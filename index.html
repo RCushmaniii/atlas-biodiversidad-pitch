@@ -1,0 +1,1601 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BioJalisco — Biodiversidad de Occidente de México</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:wght@300;400;600&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --color-forest: #1a2e1a;
+  --color-canopy: #2d4a2d;
+  --color-moss: #4a6741;
+  --color-fern: #6b8f5e;
+  --color-gold: #c8a45c;
+  --color-warm: #d4a574;
+  --color-cream: #f5f0e8;
+  --color-mist: #e8e2d6;
+  --color-stone: #8a7e6b;
+  --color-dark: #0d1a0d;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'Source Sans 3', 'Segoe UI', sans-serif;
+  --font-accent: 'Cormorant Garamond', Georgia, serif;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--color-dark);
+  color: var(--color-cream);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Language Toggle ── */
+.lang-toggle {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 1000;
+  display: flex;
+  gap: 0;
+  border: 1px solid rgba(200, 164, 92, 0.4);
+  border-radius: 2rem;
+  overflow: hidden;
+  backdrop-filter: blur(12px);
+  background: rgba(13, 26, 13, 0.6);
+}
+
+.lang-btn {
+  padding: 0.5rem 1rem;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: transparent;
+  color: var(--color-stone);
+}
+
+.lang-btn.active {
+  background: var(--color-gold);
+  color: var(--color-dark);
+}
+
+/* ── Audio Toggle ── */
+.audio-toggle {
+  position: fixed;
+  top: 1.5rem;
+  left: 1.5rem;
+  z-index: 1000;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(200, 164, 92, 0.4);
+  backdrop-filter: blur(12px);
+  background: rgba(13, 26, 13, 0.6);
+  color: var(--color-gold);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  font-size: 1.1rem;
+}
+
+.audio-toggle:hover {
+  background: rgba(200, 164, 92, 0.2);
+  transform: scale(1.05);
+}
+
+/* ── Progress Bar ── */
+.progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-gold), var(--color-fern));
+  z-index: 1001;
+  width: 0%;
+  transition: width 0.1s linear;
+}
+
+/* ── Scroll Indicator ── */
+.scroll-indicator {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  opacity: 1;
+  transition: opacity 0.6s ease;
+}
+
+.scroll-indicator.hidden { opacity: 0; pointer-events: none; }
+
+.scroll-indicator span {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+}
+
+.scroll-arrow {
+  width: 20px;
+  height: 20px;
+  border-right: 2px solid var(--color-gold);
+  border-bottom: 2px solid var(--color-gold);
+  transform: rotate(45deg);
+  animation: scrollBounce 2s ease-in-out infinite;
+}
+
+@keyframes scrollBounce {
+  0%, 100% { transform: rotate(45deg) translateY(0); opacity: 1; }
+  50% { transform: rotate(45deg) translateY(6px); opacity: 0.4; }
+}
+
+/* ── Section Base ── */
+.section {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── Reveal Animations ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              transform 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-delay-1 { transition-delay: 0.15s; }
+.reveal-delay-2 { transition-delay: 0.3s; }
+.reveal-delay-3 { transition-delay: 0.45s; }
+.reveal-delay-4 { transition-delay: 0.6s; }
+
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-60px);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+}
+
+.reveal-right {
+  opacity: 0;
+  transform: translateX(60px);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+}
+
+.reveal-left.visible, .reveal-right.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 1s ease, transform 1s ease;
+}
+
+.reveal-scale.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ═══════════════════════════════════════
+   ACT 1 — THE HOOK (Hero)
+   ═══════════════════════════════════════ */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  background: var(--color-dark);
+  overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  /* REPLACE: Add your hero photo here as background-image */
+  background: linear-gradient(135deg, #0d1a0d 0%, #1a2e1a 40%, #2d4a2d 70%, #1a2e1a 100%);
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.5);
+  transform: scale(1.1);
+  transition: transform 8s ease-out;
+}
+
+.hero.loaded .hero-bg {
+  transform: scale(1);
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(13,26,13,0.3) 0%, rgba(13,26,13,0.8) 100%);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 800px;
+  padding: 2rem;
+}
+
+.hero-eyebrow {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  margin-bottom: 2rem;
+  opacity: 0;
+  animation: fadeUp 1s ease 0.5s forwards;
+}
+
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 6vw, 4.5rem);
+  font-weight: 400;
+  line-height: 1.15;
+  color: var(--color-cream);
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  animation: fadeUp 1.2s ease 0.8s forwards;
+}
+
+.hero-title em {
+  font-style: italic;
+  color: var(--color-gold);
+}
+
+.hero-subtitle {
+  font-family: var(--font-accent);
+  font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+  font-weight: 400;
+  font-style: italic;
+  color: var(--color-warm);
+  line-height: 1.6;
+  opacity: 0;
+  animation: fadeUp 1.2s ease 1.2s forwards;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Particles (fireflies) */
+.firefly {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: var(--color-gold);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--color-gold), 0 0 20px rgba(200, 164, 92, 0.3);
+  animation: fireflyFloat linear infinite;
+  opacity: 0;
+}
+
+@keyframes fireflyFloat {
+  0% { opacity: 0; transform: translate(0, 0); }
+  10% { opacity: 0.8; }
+  90% { opacity: 0.8; }
+  100% { opacity: 0; transform: translate(var(--fx), var(--fy)); }
+}
+
+/* ═══════════════════════════════════════
+   ACT 2 — THE PROBLEM
+   ═══════════════════════════════════════ */
+.problem-section {
+  background: var(--color-forest);
+  padding: 8rem 2rem;
+  position: relative;
+}
+
+.problem-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 200px;
+  background: linear-gradient(to bottom, var(--color-dark), var(--color-forest));
+}
+
+.problem-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.section-number {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  letter-spacing: 0.2em;
+  color: var(--color-gold);
+  margin-bottom: 1.5rem;
+  text-transform: uppercase;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4.5vw, 3.2rem);
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--color-cream);
+  margin-bottom: 2rem;
+}
+
+.section-body {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  font-weight: 300;
+  line-height: 1.8;
+  color: rgba(245, 240, 232, 0.85);
+  max-width: 680px;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 2rem;
+  margin-top: 4rem;
+}
+
+.stat-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(200, 164, 92, 0.15);
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(200, 164, 92, 0.4);
+}
+
+.stat-number {
+  font-family: var(--font-display);
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: var(--color-gold);
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 300;
+  letter-spacing: 0.05em;
+  color: var(--color-mist);
+  line-height: 1.5;
+}
+
+/* Comparison */
+.comparison {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 2rem;
+  margin-top: 4rem;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .comparison { grid-template-columns: 1fr; gap: 1.5rem; }
+  .comparison-divider { display: none; }
+}
+
+.comparison-col {
+  padding: 2rem;
+  border-radius: 12px;
+}
+
+.comparison-col.old {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(138, 126, 107, 0.2);
+}
+
+.comparison-col.new {
+  background: rgba(200, 164, 92, 0.06);
+  border: 1px solid rgba(200, 164, 92, 0.25);
+}
+
+.comparison-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  color: var(--color-gold);
+  padding-top: 2rem;
+}
+
+.comparison-label {
+  font-family: var(--font-accent);
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--color-cream);
+}
+
+.comparison-list {
+  list-style: none;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 300;
+  line-height: 2;
+  color: rgba(245, 240, 232, 0.75);
+}
+
+.comparison-list li::before {
+  content: '·';
+  margin-right: 0.6rem;
+  color: var(--color-stone);
+}
+
+.comparison-col.new .comparison-list li::before {
+  content: '✦';
+  font-size: 0.7rem;
+  color: var(--color-gold);
+}
+
+/* ═══════════════════════════════════════
+   ACT 3 — THE VISION
+   ═══════════════════════════════════════ */
+.vision-section {
+  background: var(--color-dark);
+  padding: 0;
+}
+
+.vision-hero {
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  /* REPLACE: Stunning landscape of Jalisco */
+  background: linear-gradient(135deg, #1a2e1a, #2d4a2d);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+.vision-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(13,26,13,0.4), rgba(13,26,13,0.85));
+}
+
+.vision-hero-content {
+  position: relative;
+  z-index: 2;
+  max-width: 750px;
+  padding: 2rem;
+}
+
+.vision-tagline {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 3.8rem);
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.2;
+  color: var(--color-cream);
+}
+
+.vision-tagline .highlight {
+  color: var(--color-gold);
+  font-style: normal;
+}
+
+/* Species Cards */
+.species-section {
+  padding: 6rem 2rem;
+  background: var(--color-forest);
+}
+
+.species-intro {
+  max-width: 700px;
+  margin: 0 auto 4rem;
+  text-align: center;
+}
+
+.species-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.species-card {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  aspect-ratio: 3/4;
+  cursor: default;
+  transition: transform 0.4s ease;
+}
+
+.species-card:hover {
+  transform: translateY(-6px);
+}
+
+.species-card-bg {
+  position: absolute;
+  inset: 0;
+  /* REPLACE: Species photo backgrounds */
+  background: linear-gradient(135deg, var(--color-canopy), var(--color-moss));
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.6s ease;
+}
+
+.species-card:hover .species-card-bg {
+  transform: scale(1.05);
+}
+
+.species-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(13,26,13,0.95) 0%, rgba(13,26,13,0.3) 50%, transparent 100%);
+}
+
+.species-card-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1.5rem;
+  z-index: 2;
+}
+
+.species-icon {
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+}
+
+.species-name {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--color-cream);
+  margin-bottom: 0.3rem;
+}
+
+.species-role {
+  font-family: var(--font-accent);
+  font-size: 0.95rem;
+  font-style: italic;
+  color: var(--color-gold);
+  margin-bottom: 0.5rem;
+}
+
+.species-desc {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 300;
+  color: rgba(245,240,232,0.7);
+  line-height: 1.5;
+}
+
+/* ═══════════════════════════════════════
+   ACT 4 — THE EVIDENCE
+   ═══════════════════════════════════════ */
+.evidence-section {
+  background: var(--color-dark);
+  padding: 8rem 2rem;
+  position: relative;
+}
+
+.evidence-inner {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* Timeline */
+.timeline {
+  position: relative;
+  padding: 2rem 0;
+  margin-top: 3rem;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 24px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--color-gold), rgba(200,164,92,0.1));
+}
+
+@media (min-width: 769px) {
+  .timeline::before { left: 50%; transform: translateX(-50%); }
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 3rem;
+  padding-left: 60px;
+}
+
+@media (min-width: 769px) {
+  .timeline-item {
+    width: 50%;
+    padding-left: 0;
+    padding-right: 3rem;
+  }
+  .timeline-item:nth-child(even) {
+    margin-left: 50%;
+    padding-left: 3rem;
+    padding-right: 0;
+  }
+}
+
+.timeline-dot {
+  position: absolute;
+  left: 16px;
+  top: 0.5rem;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-gold);
+  border: 3px solid var(--color-dark);
+  box-shadow: 0 0 12px rgba(200,164,92,0.3);
+}
+
+@media (min-width: 769px) {
+  .timeline-dot { left: auto; right: -9px; }
+  .timeline-item:nth-child(even) .timeline-dot { left: -9px; right: auto; }
+}
+
+.timeline-phase {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+  margin-bottom: 0.5rem;
+}
+
+.timeline-title {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--color-cream);
+  margin-bottom: 0.5rem;
+}
+
+.timeline-desc {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 300;
+  line-height: 1.7;
+  color: rgba(245,240,232,0.75);
+}
+
+/* Proof Box */
+.proof-box {
+  margin-top: 5rem;
+  background: rgba(200, 164, 92, 0.06);
+  border: 1px solid rgba(200, 164, 92, 0.2);
+  border-radius: 16px;
+  padding: 3rem;
+  text-align: center;
+}
+
+.proof-box-title {
+  font-family: var(--font-accent);
+  font-size: 1.1rem;
+  font-style: italic;
+  color: var(--color-gold);
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.05em;
+}
+
+.proof-stats {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  flex-wrap: wrap;
+}
+
+.proof-stat-num {
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: var(--color-cream);
+}
+
+.proof-stat-label {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 300;
+  color: var(--color-stone);
+  margin-top: 0.3rem;
+}
+
+/* Roles */
+.roles-section {
+  margin-top: 5rem;
+}
+
+.roles-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+@media (max-width: 768px) {
+  .roles-grid { grid-template-columns: 1fr; }
+}
+
+.role-card {
+  padding: 2.5rem;
+  border-radius: 16px;
+  border: 1px solid rgba(200,164,92,0.15);
+  background: rgba(255,255,255,0.02);
+}
+
+.role-name {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-gold);
+  margin-bottom: 0.3rem;
+}
+
+.role-title {
+  font-family: var(--font-accent);
+  font-size: 1rem;
+  font-style: italic;
+  color: var(--color-warm);
+  margin-bottom: 1.2rem;
+}
+
+.role-list {
+  list-style: none;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 300;
+  line-height: 2;
+  color: rgba(245,240,232,0.8);
+}
+
+.role-list li::before {
+  content: '—';
+  margin-right: 0.6rem;
+  color: var(--color-gold);
+}
+
+/* ═══════════════════════════════════════
+   ACT 5 — THE ASK
+   ═══════════════════════════════════════ */
+.ask-section {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  /* REPLACE: Beautiful closing image */
+  background: linear-gradient(135deg, #0d1a0d, #1a2e1a);
+  background-size: cover;
+  background-position: center;
+}
+
+.ask-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(13,26,13,0.5), rgba(13,26,13,0.9));
+}
+
+.ask-content {
+  position: relative;
+  z-index: 2;
+  max-width: 650px;
+  padding: 2rem;
+}
+
+.ask-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 5vw, 3.5rem);
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--color-cream);
+  margin-bottom: 1.5rem;
+}
+
+.ask-title em {
+  font-style: italic;
+  color: var(--color-gold);
+}
+
+.ask-body {
+  font-family: var(--font-accent);
+  font-size: 1.2rem;
+  font-style: italic;
+  line-height: 1.8;
+  color: rgba(245,240,232,0.85);
+  margin-bottom: 3rem;
+}
+
+.cta-button {
+  display: inline-block;
+  padding: 1rem 3rem;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-dark);
+  background: var(--color-gold);
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  text-decoration: none;
+  box-shadow: 0 4px 24px rgba(200, 164, 92, 0.3);
+}
+
+.cta-button:hover {
+  background: var(--color-cream);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 32px rgba(200, 164, 92, 0.4);
+}
+
+/* ── Footer ── */
+.site-footer {
+  padding: 3rem 2rem;
+  text-align: center;
+  background: var(--color-dark);
+  border-top: 1px solid rgba(200,164,92,0.1);
+}
+
+.footer-text {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 300;
+  color: var(--color-stone);
+  letter-spacing: 0.05em;
+}
+
+.footer-text a {
+  color: var(--color-gold);
+  text-decoration: none;
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .hero-content { padding: 1.5rem; }
+  .problem-section, .evidence-section { padding: 5rem 1.5rem; }
+  .species-grid { grid-template-columns: 1fr; max-width: 360px; }
+  .stat-grid { grid-template-columns: 1fr; }
+  .proof-stats { gap: 2rem; }
+}
+
+/* ── Bilingual: hide/show ── */
+[data-lang="en"] .lang-es { display: none; }
+[data-lang="es"] .lang-en { display: none; }
+
+/* ── Texture overlay ── */
+.grain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* ── Image placeholder styling ── */
+.img-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 300;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(200,164,92,0.4);
+  border: 1px dashed rgba(200,164,92,0.2);
+}
+</style>
+</head>
+<body data-lang="es">
+
+<!-- Grain Overlay -->
+<div class="grain"></div>
+
+<!-- Progress Bar -->
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- Language Toggle -->
+<div class="lang-toggle">
+  <button class="lang-btn active" id="btnEs" onclick="setLang('es')">ES</button>
+  <button class="lang-btn" id="btnEn" onclick="setLang('en')">EN</button>
+</div>
+
+<!-- Audio Toggle -->
+<button class="audio-toggle" id="audioToggle" onclick="toggleAudio()" title="Forest sounds">
+  <svg id="audioIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M11 5L6 9H2v6h4l5 4V5z"/>
+    <line x1="23" y1="9" x2="17" y2="15" id="audioMute1"/>
+    <line x1="17" y1="9" x2="23" y2="15" id="audioMute2"/>
+  </svg>
+</button>
+
+<!-- Scroll Indicator -->
+<div class="scroll-indicator" id="scrollIndicator">
+  <span class="lang-es">Desliza hacia abajo</span>
+  <span class="lang-en">Scroll down</span>
+  <div class="scroll-arrow"></div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     ACT 1 — THE HOOK
+     ═══════════════════════════════════════ -->
+<section class="hero" id="hero">
+  <div class="hero-bg" id="heroBg">
+    <!-- REPLACE: Set background-image in CSS or via JS to Verónica's best landscape photo -->
+  </div>
+  <div class="hero-overlay"></div>
+
+  <!-- Fireflies -->
+  <div class="firefly" style="top:20%;left:15%;--fx:80px;--fy:-120px;animation-duration:6s;animation-delay:0s;"></div>
+  <div class="firefly" style="top:60%;left:80%;--fx:-60px;--fy:-90px;animation-duration:8s;animation-delay:1s;"></div>
+  <div class="firefly" style="top:40%;left:50%;--fx:100px;--fy:60px;animation-duration:7s;animation-delay:2s;"></div>
+  <div class="firefly" style="top:75%;left:25%;--fx:-40px;--fy:-80px;animation-duration:9s;animation-delay:3s;"></div>
+  <div class="firefly" style="top:30%;left:70%;--fx:60px;--fy:100px;animation-duration:6.5s;animation-delay:0.5s;"></div>
+
+  <div class="hero-content">
+    <p class="hero-eyebrow">
+      <span class="lang-es">Una visión para la conservación en Jalisco</span>
+      <span class="lang-en">A vision for conservation in Jalisco</span>
+    </p>
+    <h1 class="hero-title">
+      <span class="lang-es">¿Qué pasaría si tu investigación llegara a <em>100,000 personas</em>?</span>
+      <span class="lang-en">What if your research reached <em>100,000 people</em>?</span>
+    </h1>
+    <p class="hero-subtitle">
+      <span class="lang-es">Imagina una plataforma donde cada ciudadano de Jalisco se convierte en guardián de la biodiversidad.</span>
+      <span class="lang-en">Imagine a platform where every citizen of Jalisco becomes a guardian of biodiversity.</span>
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     ACT 2 — THE PROBLEM
+     ═══════════════════════════════════════ -->
+<section class="section problem-section">
+  <div class="problem-inner">
+    <p class="section-number reveal">
+      <span class="lang-es">El desafío</span>
+      <span class="lang-en">The challenge</span>
+    </p>
+    <h2 class="section-title reveal reveal-delay-1">
+      <span class="lang-es">La biodiversidad de Jalisco desaparece más rápido de lo que podemos documentarla.</span>
+      <span class="lang-en">Jalisco's biodiversity is disappearing faster than we can document it.</span>
+    </h2>
+    <p class="section-body reveal reveal-delay-2">
+      <span class="lang-es">Equipos pequeños, financiamiento limitado, años de trabajo para cubrir una fracción del territorio. No es que falte pasión ni conocimiento — falta <strong>alcance</strong>.</span>
+      <span class="lang-en">Small teams, limited funding, years of work to cover a fraction of the territory. It's not a lack of passion or expertise — it's a lack of <strong>reach</strong>.</span>
+    </p>
+
+    <div class="stat-grid">
+      <div class="stat-card reveal reveal-delay-1">
+        <div class="stat-number">80,137</div>
+        <div class="stat-label">
+          <span class="lang-es">km² del territorio de Jalisco</span>
+          <span class="lang-en">km² of Jalisco's territory</span>
+        </div>
+      </div>
+      <div class="stat-card reveal reveal-delay-2">
+        <div class="stat-number">~5%</div>
+        <div class="stat-label">
+          <span class="lang-es">monitoreado sistemáticamente</span>
+          <span class="lang-en">systematically monitored</span>
+        </div>
+      </div>
+      <div class="stat-card reveal reveal-delay-3">
+        <div class="stat-number">∞</div>
+        <div class="stat-label">
+          <span class="lang-es">especies por descubrir</span>
+          <span class="lang-en">species yet to be discovered</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="comparison">
+      <div class="comparison-col old reveal reveal-left">
+        <div class="comparison-label">
+          <span class="lang-es">Ecología tradicional</span>
+          <span class="lang-en">Traditional ecology</span>
+        </div>
+        <ul class="comparison-list">
+          <li><span class="lang-es">Equipos pequeños</span><span class="lang-en">Small teams</span></li>
+          <li><span class="lang-es">Datos limitados</span><span class="lang-en">Limited data</span></li>
+          <li><span class="lang-es">Progreso lento</span><span class="lang-en">Slow progress</span></li>
+          <li><span class="lang-es">Impacto local</span><span class="lang-en">Local impact</span></li>
+        </ul>
+      </div>
+      <div class="comparison-divider reveal">→</div>
+      <div class="comparison-col new reveal reveal-right">
+        <div class="comparison-label">
+          <span class="lang-es">Ciencia ciudadana + tecnología</span>
+          <span class="lang-en">Citizen science + technology</span>
+        </div>
+        <ul class="comparison-list">
+          <li><span class="lang-es">Miles de participantes</span><span class="lang-en">Thousands of participants</span></li>
+          <li><span class="lang-es">Datos masivos</span><span class="lang-en">Massive datasets</span></li>
+          <li><span class="lang-es">Descubrimientos rápidos</span><span class="lang-en">Rapid discoveries</span></li>
+          <li><span class="lang-es">Impacto político real</span><span class="lang-en">Real policy impact</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     ACT 3 — THE VISION
+     ═══════════════════════════════════════ -->
+<section class="section vision-section">
+  <div class="vision-hero">
+    <div class="vision-hero-overlay"></div>
+    <div class="vision-hero-content reveal-scale">
+      <p class="section-number" style="text-align:center; margin-bottom:1rem;">
+        <span class="lang-es">La visión</span>
+        <span class="lang-en">The vision</span>
+      </p>
+      <h2 class="vision-tagline">
+        <span class="lang-es">Presentamos <span class="highlight">BioJalisco</span> — la red ciudadana de biodiversidad del occidente de México</span>
+        <span class="lang-en">Introducing <span class="highlight">BioJalisco</span> — the citizen biodiversity network for western Mexico</span>
+      </h2>
+    </div>
+  </div>
+
+  <div class="species-section">
+    <div class="species-intro">
+      <p class="section-number reveal" style="text-align:center;">
+        <span class="lang-es">Los cinco guardianes</span>
+        <span class="lang-en">The five guardians</span>
+      </p>
+      <h2 class="section-title reveal reveal-delay-1" style="text-align:center; font-size:clamp(1.6rem,3.5vw,2.4rem);">
+        <span class="lang-es">Cinco especies emblemáticas. Cinco ecosistemas. Una misión.</span>
+        <span class="lang-en">Five flagship species. Five ecosystems. One mission.</span>
+      </h2>
+    </div>
+
+    <div class="species-grid">
+      <!-- Jaguar -->
+      <div class="species-card reveal reveal-delay-1">
+        <div class="species-card-bg img-placeholder" style="background: linear-gradient(135deg, #2a1a0a, #4a3520);">
+          <!-- REPLACE: Jaguar photo -->
+        </div>
+        <div class="species-card-overlay"></div>
+        <div class="species-card-content">
+          <div class="species-icon">&#128006;</div>
+          <div class="species-name">
+            <span class="lang-es">El Jaguar</span>
+            <span class="lang-en">The Jaguar</span>
+          </div>
+          <div class="species-role">
+            <span class="lang-es">Símbolo del México salvaje</span>
+            <span class="lang-en">Symbol of wild Mexico</span>
+          </div>
+          <div class="species-desc">
+            <span class="lang-es">Depredador tope. Regula poblaciones. Protege ecosistemas enteros.</span>
+            <span class="lang-en">Apex predator. Regulates populations. Protects entire ecosystems.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Military Macaw -->
+      <div class="species-card reveal reveal-delay-2">
+        <div class="species-card-bg img-placeholder" style="background: linear-gradient(135deg, #1a3a1a, #2a5a2a);">
+          <!-- REPLACE: Military Macaw photo -->
+        </div>
+        <div class="species-card-overlay"></div>
+        <div class="species-card-content">
+          <div class="species-icon">&#129436;</div>
+          <div class="species-name">
+            <span class="lang-es">La Guacamaya Militar</span>
+            <span class="lang-en">The Military Macaw</span>
+          </div>
+          <div class="species-role">
+            <span class="lang-es">Guardiana de los bosques</span>
+            <span class="lang-en">Forest guardian</span>
+          </div>
+          <div class="species-desc">
+            <span class="lang-es">Indicadora de bosques sanos. Requiere hábitats extensos e intactos.</span>
+            <span class="lang-en">Indicator of healthy forests. Requires large intact habitats.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Beaded Lizard -->
+      <div class="species-card reveal reveal-delay-3">
+        <div class="species-card-bg img-placeholder" style="background: linear-gradient(135deg, #3a2a1a, #5a4a2a);">
+          <!-- REPLACE: Mexican Beaded Lizard photo -->
+        </div>
+        <div class="species-card-overlay"></div>
+        <div class="species-card-content">
+          <div class="species-icon">&#129422;</div>
+          <div class="species-name">
+            <span class="lang-es">El Escorpión / Lagarto Enchaquirado</span>
+            <span class="lang-en">The Mexican Beaded Lizard</span>
+          </div>
+          <div class="species-role">
+            <span class="lang-es">Misterio del desierto</span>
+            <span class="lang-en">Desert mystery</span>
+          </div>
+          <div class="species-desc">
+            <span class="lang-es">Uno de los pocos lagartos venenosos del mundo. Linaje antiguo.</span>
+            <span class="lang-en">One of the world's few venomous lizards. Ancient lineage.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Spider Monkey -->
+      <div class="species-card reveal reveal-delay-1">
+        <div class="species-card-bg img-placeholder" style="background: linear-gradient(135deg, #1a2a1a, #2a4a3a);">
+          <!-- REPLACE: Spider Monkey photo -->
+        </div>
+        <div class="species-card-overlay"></div>
+        <div class="species-card-content">
+          <div class="species-icon">&#128018;</div>
+          <div class="species-name">
+            <span class="lang-es">El Mono Araña</span>
+            <span class="lang-en">The Spider Monkey</span>
+          </div>
+          <div class="species-role">
+            <span class="lang-es">Embajador del bosque</span>
+            <span class="lang-en">Forest ambassador</span>
+          </div>
+          <div class="species-desc">
+            <span class="lang-es">Dispersor de semillas esencial. Proteger al mono araña es proteger selvas enteras.</span>
+            <span class="lang-en">Essential seed disperser. Protecting spider monkeys means protecting entire forests.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Salamander -->
+      <div class="species-card reveal reveal-delay-2">
+        <div class="species-card-bg img-placeholder" style="background: linear-gradient(135deg, #1a1a2a, #2a3a4a);">
+          <!-- REPLACE: Salamander photo -->
+        </div>
+        <div class="species-card-overlay"></div>
+        <div class="species-card-content">
+          <div class="species-icon">&#129422;</div>
+          <div class="species-name">
+            <span class="lang-es">La Salamandra Mexicana</span>
+            <span class="lang-en">The Mexican Salamander</span>
+          </div>
+          <div class="species-role">
+            <span class="lang-es">Biodiversidad oculta</span>
+            <span class="lang-en">Hidden biodiversity</span>
+          </div>
+          <div class="species-desc">
+            <span class="lang-es">Los anfibios son los más amenazados del planeta. Indicadores clave de salud ecosistémica.</span>
+            <span class="lang-en">Amphibians are the most threatened on Earth. Key ecosystem health indicators.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     ACT 4 — THE EVIDENCE
+     ═══════════════════════════════════════ -->
+<section class="section evidence-section">
+  <div class="evidence-inner">
+    <p class="section-number reveal">
+      <span class="lang-es">La hoja de ruta</span>
+      <span class="lang-en">The roadmap</span>
+    </p>
+    <h2 class="section-title reveal reveal-delay-1">
+      <span class="lang-es">Un camino realista de idea a impacto nacional.</span>
+      <span class="lang-en">A realistic path from idea to national impact.</span>
+    </h2>
+
+    <div class="timeline">
+      <!-- Year 1 -->
+      <div class="timeline-item reveal reveal-left">
+        <div class="timeline-dot"></div>
+        <div class="timeline-phase">
+          <span class="lang-es">Año 1 — Piloto</span>
+          <span class="lang-en">Year 1 — Pilot</span>
+        </div>
+        <div class="timeline-title">
+          <span class="lang-es">Sierra de Quila · Bosque La Primavera · Lago de Chapala</span>
+          <span class="lang-en">Sierra de Quila · Bosque La Primavera · Lake Chapala</span>
+        </div>
+        <div class="timeline-desc">
+          <span class="lang-es">1,000 usuarios. 50,000 observaciones. 300+ especies documentadas. App MVP con identificación básica por IA.</span>
+          <span class="lang-en">1,000 users. 50,000 observations. 300+ species documented. MVP app with basic AI identification.</span>
+        </div>
+      </div>
+
+      <!-- Year 2 -->
+      <div class="timeline-item reveal reveal-right">
+        <div class="timeline-dot"></div>
+        <div class="timeline-phase">
+          <span class="lang-es">Años 1–2 — Escuelas y universidades</span>
+          <span class="lang-en">Years 1–2 — Schools & universities</span>
+        </div>
+        <div class="timeline-title">
+          <span class="lang-es">200 escuelas · 6,000+ nuevos participantes</span>
+          <span class="lang-en">200 schools · 6,000+ new contributors</span>
+        </div>
+        <div class="timeline-desc">
+          <span class="lang-es">Retos de biodiversidad entre escuelas. Clubes de naturaleza. Una generación de observadores de por vida.</span>
+          <span class="lang-en">Biodiversity challenges between schools. Nature clubs. A generation of lifelong observers.</span>
+        </div>
+      </div>
+
+      <!-- Year 3 -->
+      <div class="timeline-item reveal reveal-left">
+        <div class="timeline-dot"></div>
+        <div class="timeline-phase">
+          <span class="lang-es">Años 2–3 — Movimiento público</span>
+          <span class="lang-en">Years 2–3 — Public movement</span>
+        </div>
+        <div class="timeline-title">
+          <span class="lang-es">BioBlitz · Concursos de fotografía · Especie del mes</span>
+          <span class="lang-en">BioBlitz · Photo contests · Species of the month</span>
+        </div>
+        <div class="timeline-desc">
+          <span class="lang-es">Cobertura mediática. Identidad pública. La conservación se convierte en cultura.</span>
+          <span class="lang-en">Media coverage. Public identity. Conservation becomes culture.</span>
+        </div>
+      </div>
+
+      <!-- Year 5 -->
+      <div class="timeline-item reveal reveal-right">
+        <div class="timeline-dot"></div>
+        <div class="timeline-phase">
+          <span class="lang-es">Años 3–5 — Impacto político</span>
+          <span class="lang-en">Years 3–5 — Policy impact</span>
+        </div>
+        <div class="timeline-title">
+          <span class="lang-es">CONANP · UdeG · WWF</span>
+          <span class="lang-en">CONANP · UdeG · WWF</span>
+        </div>
+        <div class="timeline-desc">
+          <span class="lang-es">El mapa de biodiversidad más completo de occidente de México. Evidencia que impulsa la creación de áreas protegidas y corredores de vida silvestre.</span>
+          <span class="lang-en">The most comprehensive biodiversity map of western Mexico. Evidence that drives protected area creation and wildlife corridors.</span>
+        </div>
+      </div>
+
+      <!-- Year 8 -->
+      <div class="timeline-item reveal reveal-left">
+        <div class="timeline-dot"></div>
+        <div class="timeline-phase">
+          <span class="lang-es">Años 5–8 — Escala nacional</span>
+          <span class="lang-en">Years 5–8 — National scale</span>
+        </div>
+        <div class="timeline-title">
+          <span class="lang-es">100,000+ usuarios · 10 millones de observaciones</span>
+          <span class="lang-en">100,000+ users · 10 million observations</span>
+        </div>
+        <div class="timeline-desc">
+          <span class="lang-es">Expansión a Oaxaca, Chiapas, Yucatán, Baja California. El Atlas de Biodiversidad del Occidente de México.</span>
+          <span class="lang-en">Expansion to Oaxaca, Chiapas, Yucatán, Baja California. The Biodiversity Atlas of Western Mexico.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Proof Box -->
+    <div class="proof-box reveal-scale">
+      <div class="proof-box-title">
+        <span class="lang-es">Esto ya funciona en el mundo real</span>
+        <span class="lang-en">This already works in the real world</span>
+      </div>
+      <p class="section-body" style="text-align:center; margin: 0 auto 2rem; max-width:600px;">
+        <span class="lang-es">iNaturalist comenzó como un proyecto universitario pequeño. Hoy es una de las plataformas de ciencia ciudadana más grandes del mundo.</span>
+        <span class="lang-en">iNaturalist started as a small university project. Today it's one of the largest citizen science platforms in the world.</span>
+      </p>
+      <div class="proof-stats">
+        <div>
+          <div class="proof-stat-num">200M+</div>
+          <div class="proof-stat-label">
+            <span class="lang-es">observaciones</span>
+            <span class="lang-en">observations</span>
+          </div>
+        </div>
+        <div>
+          <div class="proof-stat-num">3M+</div>
+          <div class="proof-stat-label">
+            <span class="lang-es">usuarios</span>
+            <span class="lang-en">users</span>
+          </div>
+        </div>
+        <div>
+          <div class="proof-stat-num">400K+</div>
+          <div class="proof-stat-label">
+            <span class="lang-es">especies registradas</span>
+            <span class="lang-en">species recorded</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Roles -->
+    <div class="roles-section">
+      <p class="section-number reveal" style="text-align:center;">
+        <span class="lang-es">El equipo</span>
+        <span class="lang-en">The team</span>
+      </p>
+      <h2 class="section-title reveal reveal-delay-1" style="text-align:center; font-size:clamp(1.6rem,3.5vw,2.2rem);">
+        <span class="lang-es">Una combinación extraordinariamente rara.</span>
+        <span class="lang-en">An extraordinarily rare combination.</span>
+      </h2>
+      <div class="roles-grid">
+        <div class="role-card reveal reveal-left">
+          <div class="role-name">Verónica</div>
+          <div class="role-title">
+            <span class="lang-es">Directora Científica</span>
+            <span class="lang-en">Science Director</span>
+          </div>
+          <ul class="role-list">
+            <li><span class="lang-es">Experiencia en taxonomía y ecología</span><span class="lang-en">Taxonomy & ecology expertise</span></li>
+            <li><span class="lang-es">Red académica establecida</span><span class="lang-en">Established academic network</span></li>
+            <li><span class="lang-es">Credibilidad científica</span><span class="lang-en">Scientific credibility</span></li>
+            <li><span class="lang-es">Estrategia de conservación</span><span class="lang-en">Conservation strategy</span></li>
+          </ul>
+        </div>
+        <div class="role-card reveal reveal-right">
+          <div class="role-name">Robert</div>
+          <div class="role-title">
+            <span class="lang-es">Director de Tecnología y Producto</span>
+            <span class="lang-en">Technology & Product Director</span>
+          </div>
+          <ul class="role-list">
+            <li><span class="lang-es">Arquitectura de plataforma</span><span class="lang-en">Platform architecture</span></li>
+            <li><span class="lang-es">Desarrollo de IA</span><span class="lang-en">AI development</span></li>
+            <li><span class="lang-es">Escalamiento de software</span><span class="lang-en">Software scaling</span></li>
+            <li><span class="lang-es">Estrategia de producto</span><span class="lang-en">Product strategy</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     ACT 5 — THE ASK
+     ═══════════════════════════════════════ -->
+<section class="section ask-section">
+  <div class="ask-overlay"></div>
+  <div class="ask-content">
+    <h2 class="ask-title reveal">
+      <span class="lang-es"><em>Construyamos</em> esto juntos.</span>
+      <span class="lang-en">Let's <em>build</em> this together.</span>
+    </h2>
+    <p class="ask-body reveal reveal-delay-1">
+      <span class="lang-es">Tu investigación tiene el poder de transformar la conservación en todo el occidente de México. Solo necesita el alcance que la tecnología puede darle.</span>
+      <span class="lang-en">Your research has the power to transform conservation across western Mexico. It just needs the reach that technology can give it.</span>
+    </p>
+    <a class="cta-button reveal reveal-delay-2" href="#" onclick="event.preventDefault();">
+      <span class="lang-es">Hablemos de esto</span>
+      <span class="lang-en">Let's talk about this</span>
+    </a>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="site-footer">
+  <p class="footer-text">
+    <span class="lang-es">Una propuesta con cariño de Robert para Verónica · <a href="https://cushlabs.ai">CushLabs.ai</a></span>
+    <span class="lang-en">A proposal with love from Robert to Verónica · <a href="https://cushlabs.ai">CushLabs.ai</a></span>
+  </p>
+</footer>
+
+<script>
+// ── Language Toggle ──
+function setLang(lang) {
+  document.body.setAttribute('data-lang', lang);
+  document.getElementById('btnEs').classList.toggle('active', lang === 'es');
+  document.getElementById('btnEn').classList.toggle('active', lang === 'en');
+  document.documentElement.lang = lang;
+}
+
+// ── Audio Toggle ──
+let audioCtx, audioPlaying = false;
+const mute1 = document.getElementById('audioMute1');
+const mute2 = document.getElementById('audioMute2');
+
+function toggleAudio() {
+  if (!audioPlaying) {
+    startAmbient();
+    mute1.style.display = 'none';
+    mute2.style.display = 'none';
+  } else {
+    stopAmbient();
+    mute1.style.display = '';
+    mute2.style.display = '';
+  }
+  audioPlaying = !audioPlaying;
+}
+
+function startAmbient() {
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  // Layer 1: Wind/breath noise
+  const bufferSize = 2 * audioCtx.sampleRate;
+  const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+  const output = noiseBuffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) {
+    output[i] = Math.random() * 2 - 1;
+  }
+  const noise = audioCtx.createBufferSource();
+  noise.buffer = noiseBuffer;
+  noise.loop = true;
+
+  const noiseFilter = audioCtx.createBiquadFilter();
+  noiseFilter.type = 'lowpass';
+  noiseFilter.frequency.value = 400;
+
+  const noiseGain = audioCtx.createGain();
+  noiseGain.gain.value = 0.04;
+
+  noise.connect(noiseFilter);
+  noiseFilter.connect(noiseGain);
+  noiseGain.connect(audioCtx.destination);
+  noise.start();
+
+  // Layer 2: Bird-like tones (random chirps)
+  function chirp() {
+    if (!audioPlaying && audioCtx.state === 'running') return;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    const freq = 1200 + Math.random() * 2000;
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(freq * (0.7 + Math.random() * 0.6), audioCtx.currentTime + 0.15);
+    osc.type = 'sine';
+    gain.gain.setValueAtTime(0, audioCtx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.012, audioCtx.currentTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.25);
+    if (audioPlaying) {
+      setTimeout(chirp, 2000 + Math.random() * 5000);
+    }
+  }
+  setTimeout(chirp, 1000);
+
+  // Layer 3: Deep ambient drone
+  const drone = audioCtx.createOscillator();
+  const droneGain = audioCtx.createGain();
+  drone.frequency.value = 85;
+  drone.type = 'sine';
+  droneGain.gain.value = 0.025;
+  drone.connect(droneGain);
+  droneGain.connect(audioCtx.destination);
+  drone.start();
+
+  window._ambientNodes = [noise, drone, noiseGain, droneGain];
+}
+
+function stopAmbient() {
+  if (audioCtx) {
+    audioCtx.close();
+    audioCtx = null;
+  }
+}
+
+// ── Scroll Progress Bar ──
+window.addEventListener('scroll', () => {
+  const scrollTop = window.scrollY;
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  const progress = (scrollTop / docHeight) * 100;
+  document.getElementById('progressBar').style.width = progress + '%';
+
+  // Hide scroll indicator after first scroll
+  if (scrollTop > 100) {
+    document.getElementById('scrollIndicator').classList.add('hidden');
+  } else {
+    document.getElementById('scrollIndicator').classList.remove('hidden');
+  }
+});
+
+// ── Intersection Observer for Reveals ──
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, {
+  threshold: 0.15,
+  rootMargin: '0px 0px -50px 0px'
+});
+
+document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale').forEach(el => {
+  revealObserver.observe(el);
+});
+
+// ── Hero load animation ──
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('hero').classList.add('loaded');
+  }, 100);
+});
+
+// ── Animated stat counters ──
+const statObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const el = entry.target;
+      const text = el.textContent.trim();
+      // Only animate pure numbers
+      const numMatch = text.match(/^([\d,]+)/);
+      if (numMatch) {
+        const target = parseInt(numMatch[1].replace(/,/g, ''));
+        const suffix = text.replace(numMatch[1], '');
+        animateCounter(el, target, suffix);
+      }
+      statObserver.unobserve(el);
+    }
+  });
+}, { threshold: 0.5 });
+
+document.querySelectorAll('.stat-number, .proof-stat-num').forEach(el => {
+  statObserver.observe(el);
+});
+
+function animateCounter(el, target, suffix) {
+  const duration = 1500;
+  const start = performance.now();
+  function update(now) {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const current = Math.round(target * eased);
+    el.textContent = current.toLocaleString() + suffix;
+    if (progress < 1) requestAnimationFrame(update);
+  }
+  requestAnimationFrame(update);
+}
+</script>
+</body>
+</html>
