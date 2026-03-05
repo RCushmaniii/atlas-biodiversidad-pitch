@@ -5,7 +5,7 @@
 portfolio_enabled: true
 portfolio_priority: 4
 portfolio_featured: true
-portfolio_last_reviewed: "2026-03-04"
+portfolio_last_reviewed: "2026-03-05"
 
 title: "BioJalisco — Biodiversity Atlas Pitch Site"
 tagline: "Cinematic scrollytelling site pitching a citizen-science biodiversity platform for western Mexico"
@@ -23,12 +23,20 @@ tags:
   - "mexico"
   - "landing-page"
 
-thumbnail: "assets/images/ChatGPT_Image_Mar_4_2026_03_56_16_PM.webp"
+thumbnail: "assets/images/portfolio/scrollytelling_pitch_thumb.png"
 hero_images:
-  - "assets/images/ChatGPT_Image_Mar_4_2026_03_56_16_PM.webp"
-  - "assets/images/ChatGPT_Image_Mar_4_2026_03_54_58_PM.webp"
-  - "assets/images/dra-vero-rosas-lizard.webp"
-demo_video_url: ""
+  - "assets/images/portfolio/scrollytelling_pitch_01.png"
+  - "assets/images/portfolio/scrollytelling_pitch_02.png"
+  - "assets/images/portfolio/scrollytelling_pitch_03.png"
+  - "assets/images/portfolio/scrollytelling_pitch_04.png"
+  - "assets/images/portfolio/scrollytelling_pitch_05.png"
+  - "assets/images/portfolio/scrollytelling_pitch_06.png"
+  - "assets/images/portfolio/scrollytelling_pitch_07.png"
+  - "assets/images/portfolio/scrollytelling_pitch_08.png"
+  - "assets/images/portfolio/scrollytelling_pitch_09.png"
+  - "assets/images/portfolio/scrollytelling_pitch_10.png"
+demo_video_url: "assets/video/scrollytelling-pitch.mp4"
+demo_video_poster: "assets/images/portfolio/scrollytelling-pitch-poster.jpg"
 
 live_url: "https://atlas-biodiversidad-pitch.vercel.app"
 demo_url: "https://atlas-biodiversidad-pitch.vercel.app"
@@ -44,15 +52,16 @@ key_outcomes:
   - "Self-contained single-file HTML site with 9 embedded images (~1.8MB total)"
   - "Bilingual ES/EN with instant language switching"
   - "Cinematic 5-act narrative arc designed for stakeholder persuasion"
-  - "Procedural ambient forest audio via Web Audio API — no audio files"
+  - "Full auto-play presentation mode with segmented MP3 narration, rain-intro crossfades, and auto-scroll"
+  - "Mobile-first species carousel with scroll-snap, dot indicators, and audio-synced auto-cycle"
   - "Deployed on Vercel with zero build step"
 
 tech_stack:
   - "HTML5"
-  - "CSS3 (custom properties, grid, flexbox)"
+  - "CSS3 (custom properties, grid, flexbox, scroll-snap)"
   - "Vanilla JavaScript"
   - "Intersection Observer API"
-  - "Web Audio API"
+  - "Web Audio API (procedural ambient + MP3 narration)"
   - "Google Fonts"
   - "Vercel"
   - "Base64 image embedding"
@@ -100,11 +109,13 @@ The ambient forest soundscape is generated in real-time using Web Audio API — 
 ## Results
 
 **For the Stakeholder Audience:**
+
 - Complete narrative pitch accessible in both Spanish and English
 - Credibility elements (PhD photo, book trilogy, fieldwork photography) embedded directly
 - Single URL to share — no login, no app install, works on any device
 
 **Technical Demonstration:**
+
 - Proves that a high-impact persuasion site doesn't need React, a build system, or a CMS
 - Shows restraint in technology choices — vanilla JS for a project that genuinely doesn't need frameworks
 - Image optimization pipeline that could be reused across CushLabs projects
