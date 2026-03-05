@@ -864,6 +864,111 @@ body {
   object-fit: contain;
 }
 
+/* CTA Modal */
+.cta-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(10, 20, 10, 0.92);
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.cta-modal-overlay.active {
+  display: flex;
+  opacity: 1;
+}
+.cta-modal {
+  background: var(--color-forest);
+  border: 1px solid rgba(200, 164, 92, 0.3);
+  border-radius: 20px;
+  max-width: 520px;
+  width: 100%;
+  padding: 3rem 2.5rem;
+  position: relative;
+  text-align: center;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+  transform: translateY(20px);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.cta-modal-overlay.active .cta-modal {
+  transform: translateY(0);
+}
+.cta-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1.2rem;
+  background: none;
+  border: none;
+  color: var(--color-stone);
+  font-size: 1.5rem;
+  cursor: pointer;
+  line-height: 1;
+  transition: color 0.2s;
+}
+.cta-modal-close:hover { color: var(--color-cream); }
+.cta-modal-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+.cta-modal-title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--color-cream);
+  margin-bottom: 1rem;
+  line-height: 1.3;
+}
+.cta-modal-body {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--color-stone);
+  line-height: 1.7;
+  margin-bottom: 2rem;
+}
+.cta-modal-download {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.9rem 2.2rem;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--color-dark);
+  background: var(--color-gold);
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  box-shadow: 0 4px 20px rgba(200, 164, 92, 0.3);
+}
+.cta-modal-download:hover {
+  background: var(--color-cream);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 28px rgba(200, 164, 92, 0.4);
+}
+.cta-modal-download svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+.cta-modal-contact {
+  display: block;
+  margin-top: 1.2rem;
+  font-family: var(--font-accent);
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--color-gold);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.cta-modal-contact:hover { color: var(--color-cream); }
+
 /* Roles */
 .roles-section {
   padding: 8rem 2rem;
@@ -1519,7 +1624,7 @@ body {
       <span class="lang-es" lang="es">Tu investigación tiene el poder de transformar la conservación en todo el occidente de México. Solo necesita el alcance que la tecnología puede darle.</span>
       <span class="lang-en" lang="en">Your research has the power to transform conservation across western Mexico. It just needs the reach that technology can give it.</span>
     </p>
-    <a class="cta-button reveal reveal-delay-2" href="#" onclick="event.preventDefault();">
+    <a class="cta-button reveal reveal-delay-2" href="#" onclick="event.preventDefault(); openCtaModal();">
       <span class="lang-es" lang="es">Hablemos de esto</span>
       <span class="lang-en" lang="en">Let's talk about this</span>
     </a>
@@ -1901,6 +2006,23 @@ document.getElementById('scrollNav').addEventListener('click', function() {
   }
 });
 
+// ── CTA Modal ──
+function openCtaModal() {
+  var modal = document.getElementById('ctaModal');
+  modal.style.display = 'flex';
+  // Trigger reflow for animation
+  modal.offsetHeight;
+  modal.classList.add('active');
+}
+function closeCtaModal() {
+  var modal = document.getElementById('ctaModal');
+  modal.classList.remove('active');
+  setTimeout(function() { modal.style.display = 'none'; }, 400);
+}
+document.getElementById('ctaModal').addEventListener('click', function(e) {
+  if (e.target === this) closeCtaModal();
+});
+
 // ── Lightbox ──
 function openLightbox(src) {
   var overlay = document.getElementById('lightboxOverlay');
@@ -1926,6 +2048,34 @@ document.querySelectorAll('.proof-goal').forEach(function(el) {
 
 <!-- Lightbox Overlay -->
 <div class="lightbox-overlay" id="lightboxOverlay"><img src="" alt="Enlarged view"></div>
+
+<!-- CTA Modal -->
+<div class="cta-modal-overlay" id="ctaModal">
+  <div class="cta-modal">
+    <button class="cta-modal-close" onclick="closeCtaModal()">&times;</button>
+    <div class="cta-modal-icon">
+      <span class="lang-es" lang="es">&#127807;</span>
+      <span class="lang-en" lang="en">&#127807;</span>
+    </div>
+    <div class="cta-modal-title">
+      <span class="lang-es" lang="es">Esto es solo el comienzo</span>
+      <span class="lang-en" lang="en">This is just the beginning</span>
+    </div>
+    <div class="cta-modal-body">
+      <span class="lang-es" lang="es">He preparado un documento detallado con las metas del proyecto, los mecanismos de pol&iacute;tica que apuntamos, y c&oacute;mo todo se conecta. Es un punto de partida para nuestra conversaci&oacute;n.</span>
+      <span class="lang-en" lang="en">I've put together a detailed document with the project goals, the policy mechanisms we're targeting, and how it all connects. It's a starting point for our conversation.</span>
+    </div>
+    <a class="cta-modal-download" href="docs/biojalisco-goals.pdf" download>
+      <svg viewBox="0 0 24 24"><path d="M12 16l-5-5h3V4h4v7h3l-5 5zm-7 2h14v2H5v-2z"/></svg>
+      <span class="lang-es" lang="es">Descargar el plan</span>
+      <span class="lang-en" lang="en">Download the plan</span>
+    </a>
+    <a class="cta-modal-contact" href="mailto:info@cushlabs.ai">
+      <span class="lang-es" lang="es">O escr&iacute;beme &mdash; info@cushlabs.ai</span>
+      <span class="lang-en" lang="en">Or reach out &mdash; info@cushlabs.ai</span>
+    </a>
+  </div>
+</div>
 
 </body>
 </html>
