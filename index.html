@@ -1222,9 +1222,118 @@ body {
   color: rgba(200,164,92,0.4);
   border: 1px dashed rgba(200,164,92,0.2);
 }
+
+/* ── Presentation Mode Overlay ── */
+.presentation-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(13, 26, 13, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: opacity 0.6s ease;
+}
+.presentation-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+.presentation-overlay h2 {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  color: var(--color-cream);
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 20px rgba(0,0,0,0.5);
+}
+.presentation-overlay p {
+  font-family: var(--font-accent);
+  font-size: clamp(1rem, 2.5vw, 1.4rem);
+  color: rgba(245,240,232,0.7);
+  margin-bottom: 2.5rem;
+  text-align: center;
+  max-width: 30rem;
+  line-height: 1.5;
+}
+.pres-buttons {
+  display: flex;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.pres-btn-play {
+  padding: 1rem 2.5rem;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--color-dark);
+  background: var(--color-gold);
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 24px rgba(200, 164, 92, 0.3);
+}
+.pres-btn-play:hover {
+  background: var(--color-cream);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 32px rgba(200, 164, 92, 0.4);
+}
+.pres-btn-browse {
+  padding: 1rem 2.5rem;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--color-cream);
+  background: transparent;
+  border: 1px solid rgba(245, 240, 232, 0.4);
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.pres-btn-browse:hover {
+  border-color: var(--color-cream);
+  background: rgba(245, 240, 232, 0.1);
+  transform: translateY(-2px);
+}
+@keyframes ctaPulse {
+  0%, 100% { box-shadow: 0 4px 24px rgba(200, 164, 92, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(200, 164, 92, 0.8), 0 0 80px rgba(200, 164, 92, 0.4); }
+}
+.cta-button.pulsing {
+  animation: ctaPulse 0.8s ease-in-out 3;
+}
+body.presentation-active .scroll-nav {
+  display: none;
+}
 </style>
 </head>
 <body data-lang="en">
+
+<!-- Presentation Mode Overlay -->
+<div class="presentation-overlay" id="presentationOverlay">
+  <h2>BioJalisco</h2>
+  <p>
+    <span class="lang-es" lang="es">Biodiversidad del Occidente de México — una visión para la ciencia ciudadana</span>
+    <span class="lang-en" lang="en">Western Mexico Biodiversity — a vision for citizen science</span>
+  </p>
+  <div class="pres-buttons">
+    <button class="pres-btn-play" onclick="startPresentation()">
+      <span class="lang-es" lang="es">&#9654; Reproducir presentación</span>
+      <span class="lang-en" lang="en">&#9654; Play Presentation</span>
+    </button>
+    <button class="pres-btn-browse" onclick="viewSiteMode()">
+      <span class="lang-es" lang="es">Explorar el sitio</span>
+      <span class="lang-en" lang="en">View Site</span>
+    </button>
+  </div>
+</div>
 
 <!-- Grain Overlay -->
 <div class="grain"></div>
@@ -1924,11 +2033,86 @@ function initAutoAdvance() {
     if (!audio) return;
     audio.addEventListener('ended', function() {
       if (!narrationEnabled) return;
-      // Don't auto-advance, let scroll handle it
       currentSegmentIdx = -1;
       currentAudio = null;
+      // In presentation mode, auto-advance to next section after pause
+      if (window.presentationMode) {
+        var nextIdx = idx + 1;
+        if (nextIdx < narrationSegments.length) {
+          setTimeout(function() {
+            if (window.presentationMode) advancePresentation(nextIdx);
+          }, 1500);
+        } else {
+          // Last section finished — end presentation
+          setTimeout(function() { endPresentation(); }, 1500);
+        }
+      }
     });
   });
+}
+
+// ── Presentation Mode ──
+window.presentationMode = false;
+
+function startPresentation() {
+  var overlay = document.getElementById('presentationOverlay');
+  overlay.classList.add('hidden');
+  setTimeout(function() { overlay.style.display = 'none'; }, 600);
+
+  window.presentationMode = true;
+  document.body.classList.add('presentation-active');
+
+  // Enable narration and start playing hero
+  narrationEnabled = true;
+  document.getElementById('audioToggle').setAttribute('aria-pressed', 'true');
+  var m1 = document.getElementById('audioMute1');
+  var m2 = document.getElementById('audioMute2');
+  if (m1) m1.style.display = 'none';
+  if (m2) m2.style.display = 'none';
+
+  preloadAudio();
+  if (!window._narrationObserverInit) {
+    initNarrationObserver();
+    initAutoAdvance();
+    window._narrationObserverInit = true;
+  }
+
+  // Scroll to hero and play first segment
+  document.getElementById('hero').scrollIntoView({ behavior: 'smooth' });
+  setTimeout(function() { playSegment(0); }, 400);
+}
+
+function viewSiteMode() {
+  var overlay = document.getElementById('presentationOverlay');
+  overlay.classList.add('hidden');
+  setTimeout(function() { overlay.style.display = 'none'; }, 600);
+}
+
+function advancePresentation(idx) {
+  if (!window.presentationMode) return;
+  var sectionId = narrationSegments[idx].id;
+  var el = document.getElementById(sectionId);
+  if (!el) return;
+  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // Wait for scroll to settle, then play narration
+  setTimeout(function() {
+    if (window.presentationMode) playSegment(idx);
+  }, 800);
+}
+
+function endPresentation() {
+  window.presentationMode = false;
+  document.body.classList.remove('presentation-active');
+
+  // Pulse the CTA button
+  var ctaBtn = document.querySelector('.cta-button');
+  if (ctaBtn) {
+    ctaBtn.classList.add('pulsing');
+    setTimeout(function() {
+      ctaBtn.classList.remove('pulsing');
+      openCtaModal();
+    }, 2500);
+  }
 }
 
 // Toggle button
@@ -1962,6 +2146,11 @@ function toggleAudio() {
   } else {
     mute1.style.display = '';
     mute2.style.display = '';
+    // Exit presentation mode if user manually turns off audio
+    if (window.presentationMode) {
+      window.presentationMode = false;
+      document.body.classList.remove('presentation-active');
+    }
     stopNarration();
   }
 }
@@ -2014,6 +2203,8 @@ const revealObserver = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
       entry.target.classList.add('visible');
+    } else {
+      entry.target.classList.remove('visible');
     }
   });
 }, {
@@ -2035,22 +2226,34 @@ window.addEventListener('load', () => {
 // ── Animated stat counters ──
 const statObserver = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
+    const el = entry.target;
     if (entry.isIntersecting) {
-      const el = entry.target;
-      const text = el.textContent.trim();
-      // Only animate pure numbers
-      const numMatch = text.match(/^([\d,]+)/);
-      if (numMatch) {
-        const target = parseInt(numMatch[1].replace(/,/g, ''));
-        const suffix = text.replace(numMatch[1], '');
-        animateCounter(el, target, suffix);
+      const original = el.getAttribute('data-stat-original');
+      if (original) {
+        const numMatch = original.match(/^([\d,]+)/);
+        if (numMatch) {
+          const target = parseInt(numMatch[1].replace(/,/g, ''));
+          const suffix = original.replace(numMatch[1], '');
+          animateCounter(el, target, suffix);
+        }
       }
-      statObserver.unobserve(el);
+    } else {
+      // Reset to 0 so counter replays on next scroll-in
+      if (el.getAttribute('data-stat-original')) {
+        const original = el.getAttribute('data-stat-original');
+        const numMatch = original.match(/^([\d,]+)/);
+        if (numMatch) {
+          const suffix = original.replace(numMatch[1], '');
+          el.textContent = '0' + suffix;
+        }
+      }
     }
   });
 }, { threshold: 0.5 });
 
 document.querySelectorAll('.stat-number').forEach(el => {
+  // Store original value before any animation
+  el.setAttribute('data-stat-original', el.textContent.trim());
   statObserver.observe(el);
 });
 
@@ -2127,38 +2330,24 @@ window.addEventListener('DOMContentLoaded', function() {
   });
 });
 
-// ── Staggered Reveal via rAF loop (bulletproof: works with smooth scroll, transforms, etc.) ──
-var timelineRevealed = false;
-var goalsRevealed = false;
-(function rafRevealLoop() {
-  var vh = window.innerHeight;
-  if (!timelineRevealed) {
-    var evSection = document.querySelector('.evidence-section');
-    if (evSection) {
-      var rect = evSection.getBoundingClientRect();
-      if (rect.top < vh && rect.bottom > 0) {
-        timelineRevealed = true;
-        document.querySelectorAll('.timeline-item').forEach(function(el) {
-          el.classList.add('visible');
-        });
-      }
-    }
+// ── Staggered Reveal via IntersectionObserver (repeatable) ──
+(function() {
+  function createStaggerObserver(containerSelector, childSelector) {
+    var container = document.querySelector(containerSelector);
+    if (!container) return;
+    new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        var children = container.querySelectorAll(childSelector);
+        if (entry.isIntersecting) {
+          children.forEach(function(el) { el.classList.add('visible'); });
+        } else {
+          children.forEach(function(el) { el.classList.remove('visible'); });
+        }
+      });
+    }, { threshold: 0.1 }).observe(container);
   }
-  if (!goalsRevealed) {
-    var goalsBox = document.querySelector('.proof-goals');
-    if (goalsBox) {
-      var rect = goalsBox.getBoundingClientRect();
-      if (rect.top < vh && rect.bottom > 0) {
-        goalsRevealed = true;
-        document.querySelectorAll('.proof-goal').forEach(function(el) {
-          el.classList.add('visible');
-        });
-      }
-    }
-  }
-  if (!timelineRevealed || !goalsRevealed) {
-    requestAnimationFrame(rafRevealLoop);
-  }
+  createStaggerObserver('.evidence-section', '.timeline-item');
+  createStaggerObserver('.proof-goals', '.proof-goal');
 })();
 
 // ── Auto-scale roadmap to fill viewport ──
