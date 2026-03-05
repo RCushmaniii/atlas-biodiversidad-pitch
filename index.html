@@ -781,39 +781,55 @@ body {
   letter-spacing: 0.05em;
 }
 
-.proof-stats {
+.proof-goals {
   display: flex;
-  justify-content: center;
-  gap: 3rem;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 640px;
+  margin: 0 auto;
+  text-align: left;
 }
 
-.proof-stat {
+.proof-goal {
   opacity: 0;
-  transform: translateY(30px) scale(0.8);
+  transform: translateX(-30px);
   transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
 }
-.proof-stat.visible {
+.proof-goal.visible {
   opacity: 1;
-  transform: translateY(0) scale(1);
+  transform: translateX(0);
 }
-.proof-stat:nth-child(1) { transition-delay: 0s; }
-.proof-stat:nth-child(2) { transition-delay: 0.3s; }
-.proof-stat:nth-child(3) { transition-delay: 0.6s; }
+.proof-goal:nth-child(1) { transition-delay: 0s; }
+.proof-goal:nth-child(2) { transition-delay: 0.4s; }
+.proof-goal:nth-child(3) { transition-delay: 0.8s; }
 
-.proof-stat-num {
+.proof-goal-num {
   font-family: var(--font-display);
-  font-size: 2.4rem;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--color-gold);
+  flex-shrink: 0;
+  line-height: 1;
+  margin-top: 0.1rem;
+}
+
+.proof-goal-title {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
   font-weight: 700;
   color: var(--color-cream);
+  margin-bottom: 0.3rem;
 }
 
-.proof-stat-label {
+.proof-goal-desc {
   font-family: var(--font-body);
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 300;
   color: var(--color-stone);
-  margin-top: 0.3rem;
+  line-height: 1.5;
 }
 
 /* Credibility image */
@@ -1005,7 +1021,7 @@ body {
   .problem-section, .evidence-section { padding: 5rem 1.5rem; }
   .species-grid { grid-template-columns: 1fr; max-width: 360px; }
   .stat-grid { grid-template-columns: 1fr; }
-  .proof-stats { gap: 2rem; }
+  .proof-goals { gap: 1.2rem; }
 }
 
 /* ── Bilingual: hide/show ── */
@@ -1386,36 +1402,50 @@ body {
       </div>
     </div>
 
-    <!-- Proof Box -->
+    <!-- Goals Box -->
     <div class="proof-box reveal-scale">
       <div class="proof-box-title">
-        <span class="lang-es" lang="es">Esto ya funciona en el mundo real</span>
-        <span class="lang-en" lang="en">This already works in the real world</span>
+        <span class="lang-es" lang="es">Tres metas. Un cambio real.</span>
+        <span class="lang-en" lang="en">Three goals. Real change.</span>
       </div>
-      <p class="section-body" style="text-align:center; margin: 0 auto 2rem; max-width:600px;">
-        <span class="lang-es" lang="es">iNaturalist comenzó como un proyecto universitario pequeño. Hoy es una de las plataformas de ciencia ciudadana más grandes del mundo.</span>
-        <span class="lang-en" lang="en">iNaturalist started as a small university project. Today it's one of the largest citizen science platforms in the world.</span>
-      </p>
-      <div class="proof-stats">
-        <div class="proof-stat">
-          <div class="proof-stat-num">200M+</div>
-          <div class="proof-stat-label">
-            <span class="lang-es" lang="es">observaciones</span>
-            <span class="lang-en" lang="en">observations</span>
+      <div class="proof-goals">
+        <div class="proof-goal">
+          <div class="proof-goal-num">1</div>
+          <div>
+            <div class="proof-goal-title">
+              <span class="lang-es" lang="es">Construir el dataset</span>
+              <span class="lang-en" lang="en">Build the dataset</span>
+            </div>
+            <div class="proof-goal-desc">
+              <span class="lang-es" lang="es">La base de datos de biodiversidad más completa que el occidente de México haya tenido — a una escala imposible para equipos de campo tradicionales.</span>
+              <span class="lang-en" lang="en">The most comprehensive biodiversity database western Mexico has ever had — at a scale impossible for traditional field teams.</span>
+            </div>
           </div>
         </div>
-        <div class="proof-stat">
-          <div class="proof-stat-num">3M+</div>
-          <div class="proof-stat-label">
-            <span class="lang-es" lang="es">usuarios</span>
-            <span class="lang-en" lang="en">users</span>
+        <div class="proof-goal">
+          <div class="proof-goal-num">2</div>
+          <div>
+            <div class="proof-goal-title">
+              <span class="lang-es" lang="es">Alimentar la maquinaria de política</span>
+              <span class="lang-en" lang="en">Feed the policy machine</span>
+            </div>
+            <div class="proof-goal-desc">
+              <span class="lang-es" lang="es">Datos directos para NOM-059, paquetes de evidencia para CONANP, contribuciones a SNIB de CONABIO, y datos locales para la planificación ecológica de Jalisco.</span>
+              <span class="lang-en" lang="en">Direct data for NOM-059 species listings, evidence packages for CONANP protected areas, contributions to CONABIO's SNIB, and local data for Jalisco ecological planning.</span>
+            </div>
           </div>
         </div>
-        <div class="proof-stat">
-          <div class="proof-stat-num">400K+</div>
-          <div class="proof-stat-label">
-            <span class="lang-es" lang="es">especies registradas</span>
-            <span class="lang-en" lang="en">species recorded</span>
+        <div class="proof-goal">
+          <div class="proof-goal-num">3</div>
+          <div>
+            <div class="proof-goal-title">
+              <span class="lang-es" lang="es">Crear una base ciudadana</span>
+              <span class="lang-en" lang="en">Build a constituency</span>
+            </div>
+            <div class="proof-goal-desc">
+              <span class="lang-es" lang="es">10,000 ciudadanos monitoreando biodiversidad son también 10,000 votantes que les importa la conservación. Eso cambia el cálculo político.</span>
+              <span class="lang-en" lang="en">10,000 citizens monitoring biodiversity are also 10,000 voters who care about conservation. That changes the political calculus.</span>
+            </div>
           </div>
         </div>
       </div>
@@ -1826,7 +1856,7 @@ const statObserver = new IntersectionObserver((entries) => {
   });
 }, { threshold: 0.5 });
 
-document.querySelectorAll('.stat-number, .proof-stat-num').forEach(el => {
+document.querySelectorAll('.stat-number').forEach(el => {
   statObserver.observe(el);
 });
 
@@ -1881,16 +1911,16 @@ document.getElementById('lightboxOverlay').addEventListener('click', function() 
   this.classList.remove('active');
 });
 
-// ── Staggered Stat Reveal ──
-var statObserver = new IntersectionObserver(function(entries) {
+// ── Staggered Goal Reveal ──
+var goalObserver = new IntersectionObserver(function(entries) {
   entries.forEach(function(entry) {
     if (entry.isIntersecting) {
       entry.target.classList.add('visible');
     }
   });
 }, { threshold: 0.3 });
-document.querySelectorAll('.proof-stat').forEach(function(el) {
-  statObserver.observe(el);
+document.querySelectorAll('.proof-goal').forEach(function(el) {
+  goalObserver.observe(el);
 });
 </script>
 
