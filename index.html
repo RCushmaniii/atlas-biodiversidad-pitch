@@ -292,18 +292,7 @@ body {
   padding: 2rem;
 }
 
-/* Hero text animations paused until overlay is dismissed */
-.hero-eyebrow,
-.hero-title,
-.hero-subtitle {
-  animation-play-state: paused;
-}
-.hero.hero-text-ready .hero-eyebrow,
-.hero.hero-text-ready .hero-title,
-.hero.hero-text-ready .hero-subtitle {
-  animation-play-state: running;
-}
-
+/* Hero text hidden by default, animations only fire after overlay dismissed */
 .hero-eyebrow {
   font-family: var(--font-body);
   font-size: 0.75rem;
@@ -313,7 +302,6 @@ body {
   color: var(--color-gold);
   margin-bottom: 2rem;
   opacity: 0;
-  animation: fadeUp 1s ease 0.5s forwards;
 }
 
 .hero-title {
@@ -324,7 +312,6 @@ body {
   color: var(--color-cream);
   margin-bottom: 1.5rem;
   opacity: 0;
-  animation: fadeUp 1.2s ease 0.8s forwards;
 }
 
 .hero-title em {
@@ -340,6 +327,15 @@ body {
   color: var(--color-warm);
   line-height: 1.6;
   opacity: 0;
+}
+
+.hero.hero-text-ready .hero-eyebrow {
+  animation: fadeUp 1s ease 0.5s forwards;
+}
+.hero.hero-text-ready .hero-title {
+  animation: fadeUp 1.2s ease 0.8s forwards;
+}
+.hero.hero-text-ready .hero-subtitle {
   animation: fadeUp 1.2s ease 1.2s forwards;
 }
 
