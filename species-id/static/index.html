@@ -603,7 +603,7 @@ function identify() {
   resultCard.innerHTML = '';
   identifyBtn.disabled = true;
   
-  fetch('/identify', {
+  fetch('/api/identify', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ image_data: imageData })

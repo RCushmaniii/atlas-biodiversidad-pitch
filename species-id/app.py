@@ -55,6 +55,7 @@ def index():
 
 
 @app.route('/identify', methods=['POST'])
+@app.route('/api/identify', methods=['POST'])
 def identify():
     if 'image' not in request.files and 'image_data' not in request.json if request.is_json else True:
         return jsonify({"error": "No image provided"}), 400

@@ -2,6 +2,8 @@
   "buildCommand": null,
   "outputDirectory": ".",
   "routes": [
+    { "src": "/api/identify", "dest": "/api/identify.py" },
+    { "src": "/species-id", "dest": "/species-id/static/index.html" },
     { "src": "/assets/(.*)", "dest": "/assets/$1" },
     { "src": "/docs/(.*)", "dest": "/docs/$1" },
     { "src": "/(.*)", "dest": "/index.html" }
@@ -10,7 +12,10 @@
     {
       "source": "/assets/audio/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        },
         { "key": "Content-Type", "value": "audio/mpeg" }
       ]
     }
