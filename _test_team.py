@@ -13,9 +13,11 @@ with sync_playwright() as p:
         btn.click()
         page.wait_for_timeout(800)
 
-    # Scroll to team section
-    page.evaluate("document.getElementById('team').scrollIntoView({behavior:'instant'})")
-    page.wait_for_timeout(500)
+    # Scroll section to exact viewport top
+    page.evaluate("document.getElementById('team').scrollIntoView({block:'start',behavior:'instant'})")
+    page.wait_for_timeout(300)
+    page.evaluate("window.scrollBy(0, document.getElementById('team').getBoundingClientRect().top)")
+    page.wait_for_timeout(300)
 
     info = page.evaluate("""() => {
         var section = document.getElementById('team');
@@ -34,7 +36,6 @@ with sync_playwright() as p:
             viewport: window.innerHeight,
             sectionTop: sectionR.top,
             sectionHeight: sectionR.height,
-            sectionBottom: sectionR.bottom,
             gridTop: gridR.top,
             gridBottom: gridR.bottom,
             gridHeight: gridR.height,
@@ -42,30 +43,27 @@ with sync_playwright() as p:
             gridClientWidth: grid.clientWidth,
             dotsTop: dotsR ? dotsR.top : null,
             dotsBottom: dotsR ? dotsR.bottom : null,
-            dotsVisible: dotsR ? (dotsR.top < window.innerHeight && dotsR.bottom > 0) : false,
-            dotsHeight: dotsR ? dotsR.height : 0,
+            dotsVisible: dotsR ? (dotsR.bottom <= window.innerHeight) : false,
             cards: cardRects
         };
     }""")
 
+    vp = info['viewport']
+    st = info['sectionTop']
     print("=== Team Section Layout ===")
-    print(f"  Viewport: {info['viewport']}px")
-    print(f"  Section: top={info['sectionTop']:.0f}, height={info['sectionHeight']:.0f}, bottom={info['sectionBottom']:.0f}")
-    print(f"  Grid: top={info['gridTop']:.0f}, bottom={info['gridBottom']:.0f}, height={info['gridHeight']:.0f}")
-    print(f"  Grid scroll: scrollWidth={info['gridScrollWidth']:.0f}, clientWidth={info['gridClientWidth']:.0f}")
-    print(f"  Dots: top={info['dotsTop']}, bottom={info['dotsBottom']}, visible={info['dotsVisible']}")
+    print(f"  Viewport: {vp}px")
+    print(f"  Section: top={st:.1f}, height={info['sectionHeight']:.0f}")
+    print(f"  Grid: offset={info['gridTop']-st:.0f}, height={info['gridHeight']:.0f}")
+    print(f"  Grid scroll: scrollW={info['gridScrollWidth']:.0f}, clientW={info['gridClientWidth']:.0f}")
+    dt = info['dotsTop'] - st if info['dotsTop'] else None
+    db = info['dotsBottom'] - st if info['dotsBottom'] else None
+    print(f"  Dots: offset={dt:.0f}-{db:.0f} (viewport pos={info['dotsTop']:.0f}-{info['dotsBottom']:.0f}), visible={info['dotsVisible']}")
     for i, c in enumerate(info['cards']):
-        print(f"  Card {i}: top={c['top']:.0f}, bottom={c['bottom']:.0f}, height={c['height']:.0f}, left={c['left']:.0f}, width={c['width']:.0f}")
+        print(f"  Card {i}: offset={c['top']-st:.0f}, height={c['height']:.0f}, left={c['left']:.0f}, width={c['width']:.0f}")
 
-    # Check if dots are below the fold
-    if info['dotsTop'] and info['dotsTop'] > info['viewport']:
-        print(f"\n  PROBLEM: Dots are {info['dotsTop'] - info['viewport']:.0f}px BELOW viewport fold!")
+    fits = info['dotsBottom'] and info['dotsBottom'] <= vp
+    print(f"\n  {'OK: Everything fits in viewport' if fits else 'PROBLEM: Dots below viewport fold (' + str(round(info['dotsBottom'] - vp)) + 'px over)'}")
 
     page.screenshot(path="/tmp/team_debug.png", full_page=False)
-
-    # Also scroll to show dots area
-    page.evaluate("document.querySelector('.team-dots').scrollIntoView({behavior:'instant', block:'center'})")
-    page.wait_for_timeout(300)
-    page.screenshot(path="/tmp/team_dots_visible.png", full_page=False)
 
     browser.close()

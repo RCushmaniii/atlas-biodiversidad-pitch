@@ -1330,12 +1330,12 @@ body {
   .species-section { padding: 5rem 0.5rem; }
   .species-grid { padding: 0 6%; }
   .species-card { flex: 0 0 88%; margin: 0 0.25rem; }
-  .role-card { flex: 0 0 92%; padding: 0.85rem; }
-  .role-card img { max-height: 170px; object-fit: cover; object-position: top; border-radius: 8px; margin-bottom: 0.4rem; }
-  .role-name { font-size: 1.1rem; }
-  .role-title { font-size: 0.8rem; margin-bottom: 0.3rem; }
-  .role-list { font-size: 0.78rem; line-height: 1.6; margin-top: 0.5rem; }
-  .team-dots { margin-top: 0.1rem; }
+  .role-card { flex: 0 0 92%; display: flex; flex-direction: column; padding: clamp(0.75rem, 2vw, 1.5rem); }
+  .role-card img { flex: 1; min-height: 0; width: 100%; object-fit: cover; object-position: top; border-radius: 8px; margin-bottom: clamp(0.3rem, 1vh, 0.8rem); }
+  .role-name { font-size: clamp(1rem, 3vw, 1.3rem); }
+  .role-title { font-size: clamp(0.78rem, 2vw, 0.9rem); margin-bottom: clamp(0.2rem, 0.5vh, 0.4rem); }
+  .role-list { font-size: clamp(0.72rem, 2vw, 0.85rem); line-height: 1.7; margin-top: clamp(0.3rem, 0.8vh, 0.6rem); }
+  .team-dots { margin-top: 0.75rem; }
   .stat-grid { grid-template-columns: repeat(3, 1fr); }
   .proof-goals { gap: 1.2rem; }
   .proof-box { padding: 1.5rem; }
@@ -1344,10 +1344,10 @@ body {
   .cta-modal-download { padding: 0.9rem 2rem; font-size: 0.85rem; }
   .credibility-section { padding: 3rem 1.5rem; }
   .credibility-img { max-width: 100%; }
-  .team-section { padding: 1.5rem 1.5rem; }
-  .roles-section { padding: 0.25rem 1rem; }
-  .roles-section .section-title { font-size: clamp(1.2rem, 3vw, 1.6rem) !important; margin-bottom: 0.25rem; }
-  .roles-grid { margin-top: 0.5rem; }
+  .team-section { padding: 2rem 1.5rem; height: 100dvh; height: 100vh; min-height: unset; align-items: stretch; }
+  .roles-section { padding: 0.5rem 1rem; display: flex; flex-direction: column; height: 100%; }
+  .roles-section .section-title { font-size: clamp(1.3rem, 3.5vw, 1.8rem) !important; margin-bottom: 0.5rem; }
+  .roles-grid { flex: 1; min-height: 0; margin-top: 0.5rem; align-items: stretch; }
   .timeline-title { font-size: 1.15rem; }
   .timeline-desc { font-size: 0.85rem; }
   .lang-toggle { top: 1rem; right: 1rem; }
@@ -2873,22 +2873,29 @@ window.addEventListener('DOMContentLoaded', function() {
       scrollTimer = setTimeout(updateDots, 60);
     });
 
-    // Auto-scroll to Robert's card when team section enters viewport
+    // Auto-scroll to Robert's card at 9s into team narration audio
     if (cards.length > 1 && window.matchMedia('(max-width: 768px)').matches) {
-      var teamSection = document.getElementById('team');
-      if (teamSection) {
-        var autoScrolled = false;
-        var teamObs = new IntersectionObserver(function(entries) {
-          if (entries[0].isIntersecting && !autoScrolled) {
-            autoScrolled = true;
-            teamObs.disconnect();
-            setTimeout(function() {
-              cards[1].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-              setTimeout(updateDots, 400);
-            }, 2500);
-          }
-        }, { threshold: 0.3 });
-        teamObs.observe(teamSection);
+      var teamScrolled = false;
+      function onTeamTime() {
+        if (teamScrolled) return;
+        if (this.currentTime >= 9) {
+          teamScrolled = true;
+          this.removeEventListener('timeupdate', onTeamTime);
+          cards[1].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+          setTimeout(updateDots, 400);
+        }
+      }
+      function attachTeamAudio() {
+        if (typeof audioElements !== 'undefined' && audioElements['team']) {
+          audioElements['team'].addEventListener('timeupdate', onTeamTime);
+          return true;
+        }
+        return false;
+      }
+      if (!attachTeamAudio()) {
+        var iv = setInterval(function() {
+          if (attachTeamAudio()) clearInterval(iv);
+        }, 1000);
       }
     }
   })();
