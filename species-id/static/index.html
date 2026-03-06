@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>BioJalisco Species Identifier</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400;500;600&family=Cormorant+Garamond:ital@1&display=swap" rel="stylesheet">
+<style>
+:root {
+  --dark: #111610;
+  --dark-surface: #1a1f16;
+  --dark-elevated: #232920;
+  --gold: #c8a45c;
+  --gold-dim: rgba(200,164,92,0.12);
+  --gold-glow: rgba(200,164,92,0.06);
+  --warm: #d4a843;
+  --cream: #f5f0e8;
+  --cream-75: rgba(245,240,232,0.65);
+  --cream-50: rgba(245,240,232,0.4);
+  --green: #5a9a6a;
+  --green-dim: rgba(90,154,106,0.15);
+  --red-dim: rgba(200,90,90,0.15);
+  --radius: 14px;
+  --radius-sm: 10px;
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--dark);
+  color: var(--cream);
+  min-height: 100dvh;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── SVG Icon System ── */
+.icon {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+  flex-shrink: 0;
+}
+.icon-sm { width: 14px; height: 14px; }
+.icon-lg { width: 44px; height: 44px; stroke-width: 1.2; }
+
+/* ── Header ── */
+.header {
+  text-align: center;
+  padding: 2.5rem 1.5rem 1.25rem;
+  width: 100%;
+  max-width: 480px;
+}
+
+.header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.3rem, 5vw, 1.8rem);
+  color: var(--cream);
+  margin-bottom: 0.4rem;
+  letter-spacing: -0.02em;
+}
+
+.header h1 span.accent { color: var(--gold); }
+
+.header p {
+  font-size: clamp(0.78rem, 2.5vw, 0.88rem);
+  color: var(--cream-75);
+  font-weight: 300;
+  line-height: 1.5;
+}
+
+/* ── Capture Area ── */
+.capture-area {
+  width: 100%;
+  max-width: 480px;
+  padding: 0 1.25rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.preview-box {
+  width: 100%;
+  aspect-ratio: 4/3;
+  max-height: 50vh;
+  border-radius: var(--radius);
+  border: 1.5px dashed rgba(200,164,92,0.2);
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--dark-surface);
+  transition: border-color 0.3s, border-style 0.3s;
+}
+
+.preview-box.has-image {
+  border-color: rgba(200,164,92,0.35);
+  border-style: solid;
+}
+
+.preview-box img,
+.preview-box video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: none;
+}
+
+.preview-box img.active,
+.preview-box video.active {
+  display: block;
+}
+
+.placeholder {
+  text-align: center;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.placeholder .icon-lg {
+  color: var(--cream-50);
+}
+
+.placeholder p {
+  font-size: 0.82rem;
+  color: var(--cream-50);
+  font-weight: 300;
+  line-height: 1.6;
+}
+
+/* ── Action Buttons ── */
+.actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 1rem;
+  width: 100%;
+}
+
+.btn {
+  flex: 1;
+  padding: 0.8rem 0.75rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--dark-surface);
+  color: var(--cream-75);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn:hover { background: var(--dark-elevated); border-color: rgba(255,255,255,0.12); }
+.btn:active { transform: scale(0.97); }
+
+.btn-primary {
+  background: var(--gold);
+  color: var(--dark);
+  border: none;
+  font-weight: 600;
+}
+
+.btn-primary:hover { background: var(--warm); }
+
+.btn-primary:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-primary:disabled:hover { background: var(--gold); }
+
+/* ── Result Card ── */
+.result-card {
+  width: 100%;
+  margin-top: 1.25rem;
+  margin-bottom: 2rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--gold-dim);
+  background: var(--dark-surface);
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.result-card.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.result-header {
+  padding: 1.25rem 1.25rem 1rem;
+  background: var(--gold-glow);
+  border-bottom: 1px solid var(--gold-dim);
+}
+
+.result-common {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.35rem;
+  color: var(--gold);
+  margin-bottom: 0.1rem;
+  letter-spacing: -0.01em;
+}
+
+.result-scientific {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--cream-75);
+}
+
+.result-breed {
+  font-size: 0.78rem;
+  color: var(--cream-50);
+  font-weight: 400;
+  margin-top: 0.25rem;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.result-body {
+  padding: 0.75rem 1.25rem 1.25rem;
+}
+
+.result-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 0.82rem;
+}
+
+.result-row:last-of-type { border-bottom: none; }
+
+.result-label {
+  color: var(--cream-50);
+  font-weight: 400;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.result-value {
+  font-weight: 500;
+  text-align: right;
+  max-width: 60%;
+  font-size: 0.82rem;
+}
+
+.result-description {
+  margin-top: 0.75rem;
+  padding: 1rem;
+  background: rgba(255,255,255,0.02);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255,255,255,0.04);
+  font-size: 0.82rem;
+  line-height: 1.75;
+  color: var(--cream-75);
+  font-weight: 300;
+}
+
+.result-fun-fact {
+  margin-top: 0.6rem;
+  padding: 0.85rem 1rem;
+  background: var(--green-dim);
+  border-left: 2px solid var(--green);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 0.8rem;
+  line-height: 1.65;
+  color: var(--cream);
+  font-weight: 300;
+}
+
+.result-fun-fact strong {
+  color: var(--green);
+  font-weight: 600;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ── Badges ── */
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-high { background: var(--green-dim); color: var(--green); }
+.badge-medium { background: rgba(200,164,92,0.15); color: var(--gold); }
+.badge-low { background: var(--red-dim); color: #d48888; }
+.badge-yes { background: var(--green-dim); color: var(--green); }
+.badge-no { background: var(--red-dim); color: #c89090; }
+.badge-unknown { background: rgba(255,255,255,0.06); color: var(--cream-50); }
+
+/* ── Error State ── */
+.result-error {
+  padding: 1.5rem 1.25rem;
+  text-align: center;
+}
+
+.result-error p {
+  font-size: 0.85rem;
+  margin-bottom: 0.5rem;
+  color: var(--cream);
+  font-weight: 400;
+}
+
+.result-error .suggestion {
+  font-size: 0.8rem;
+  color: var(--cream-50);
+  font-weight: 300;
+}
+
+/* ── Loading ── */
+.loading {
+  display: none;
+  text-align: center;
+  padding: 2.5rem 1rem;
+}
+
+.loading.active { display: block; }
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 2px solid rgba(200,164,92,0.15);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading p {
+  font-size: 0.82rem;
+  color: var(--cream-50);
+  font-weight: 300;
+}
+
+/* ── Language Toggle ── */
+.lang-toggle {
+  position: fixed;
+  top: 0.85rem;
+  right: 0.85rem;
+  display: flex;
+  border-radius: 7px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.08);
+  z-index: 10;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(17,22,16,0.85);
+}
+
+.lang-btn {
+  padding: 0.35rem 0.6rem;
+  background: transparent;
+  color: var(--cream-50);
+  border: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.03em;
+}
+
+.lang-btn.active {
+  background: var(--gold);
+  color: var(--dark);
+}
+
+.hidden { display: none; }
+
+/* ── Footer ── */
+.footer {
+  padding: 1.5rem 1rem;
+  text-align: center;
+  font-size: 0.68rem;
+  color: var(--cream-50);
+  font-weight: 300;
+  letter-spacing: 0.02em;
+}
+
+.footer a { color: var(--gold); text-decoration: none; opacity: 0.7; }
+.footer a:hover { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- SVG Sprite (hidden) -->
+<svg style="display:none">
+  <symbol id="ico-viewfinder" viewBox="0 0 24 24">
+    <path d="M2 8V6a2 2 0 0 1 2-2h2"/>
+    <path d="M18 4h2a2 2 0 0 1 2 2v2"/>
+    <path d="M22 16v2a2 2 0 0 1-2 2h-2"/>
+    <path d="M6 20H4a2 2 0 0 1-2-2v-2"/>
+    <circle cx="12" cy="12" r="3"/>
+  </symbol>
+  <symbol id="ico-camera" viewBox="0 0 24 24">
+    <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/>
+    <circle cx="12" cy="13" r="3"/>
+  </symbol>
+  <symbol id="ico-upload" viewBox="0 0 24 24">
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+    <polyline points="17 8 12 3 7 8"/>
+    <line x1="12" y1="3" x2="12" y2="15"/>
+  </symbol>
+  <symbol id="ico-search" viewBox="0 0 24 24">
+    <circle cx="11" cy="11" r="8"/>
+    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+  </symbol>
+  <symbol id="ico-leaf" viewBox="0 0 24 24">
+    <path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 2c1 2 2 4.5 2 8 0 5.5-4.78 10-10 10Z"/>
+    <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+  </symbol>
+</svg>
+
+<div class="lang-toggle">
+  <button class="lang-btn" data-lang="es" onclick="setLang('es')">ES</button>
+  <button class="lang-btn active" data-lang="en" onclick="setLang('en')">EN</button>
+</div>
+
+<div class="header">
+  <h1>
+    <span class="lang-en"><span class="accent">Species</span> Identifier</span>
+    <span class="lang-es" style="display:none"><span class="accent">Identificador</span> de Especies</span>
+  </h1>
+  <p>
+    <span class="lang-en">Photograph any living thing and let AI identify it</span>
+    <span class="lang-es" style="display:none">Fotografía cualquier ser vivo y deja que la IA lo identifique</span>
+  </p>
+</div>
+
+<div class="capture-area">
+  <div class="preview-box" id="previewBox">
+    <div class="placeholder" id="placeholder">
+      <svg class="icon icon-lg"><use href="#ico-viewfinder"/></svg>
+      <p>
+        <span class="lang-en">Any plant, animal, insect, or fungus<br>— wild or domestic</span>
+        <span class="lang-es" style="display:none">Cualquier planta, animal, insecto u hongo<br>— silvestre o doméstico</span>
+      </p>
+    </div>
+    <img id="preview" alt="Preview">
+    <video id="camera" autoplay playsinline></video>
+  </div>
+
+  <div class="actions">
+    <button class="btn" id="cameraBtn" onclick="openCamera()">
+      <svg class="icon"><use href="#ico-camera"/></svg>
+      <span class="lang-en">Camera</span>
+      <span class="lang-es" style="display:none">Cámara</span>
+    </button>
+    <button class="btn" id="uploadBtn" onclick="document.getElementById('fileInput').click()">
+      <svg class="icon"><use href="#ico-upload"/></svg>
+      <span class="lang-en">Upload</span>
+      <span class="lang-es" style="display:none">Subir</span>
+    </button>
+    <button class="btn btn-primary" id="identifyBtn" onclick="identify()" disabled>
+      <svg class="icon"><use href="#ico-search"/></svg>
+      <span class="lang-en">Identify</span>
+      <span class="lang-es" style="display:none">Identificar</span>
+    </button>
+  </div>
+
+  <input type="file" id="fileInput" class="hidden" accept="image/*" onchange="handleFile(event)">
+  <input type="file" id="cameraInput" class="hidden" accept="image/*" capture="environment" onchange="handleFile(event)">
+
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p>
+      <span class="lang-en">Analyzing...</span>
+      <span class="lang-es" style="display:none">Analizando...</span>
+    </p>
+  </div>
+
+  <div class="result-card" id="resultCard"></div>
+</div>
+
+<div class="footer">
+  <span class="lang-en">Powered by GPT-4o Vision · <a href="https://cushlabs.ai">CushLabs AI</a></span>
+  <span class="lang-es" style="display:none">Impulsado por GPT-4o Vision · <a href="https://cushlabs.ai">CushLabs AI</a></span>
+</div>
+
+<script>
+var currentLang = 'en';
+var imageData = null;
+var cameraStream = null;
+
+function setLang(lang) {
+  currentLang = lang;
+  document.querySelectorAll('.lang-btn').forEach(function(b) {
+    b.classList.toggle('active', b.dataset.lang === lang);
+  });
+  document.querySelectorAll('.lang-en').forEach(function(el) {
+    el.style.display = lang === 'en' ? '' : 'none';
+  });
+  document.querySelectorAll('.lang-es').forEach(function(el) {
+    el.style.display = lang === 'es' ? '' : 'none';
+  });
+}
+
+function openCamera() {
+  if (/Mobi|Android/i.test(navigator.userAgent)) {
+    document.getElementById('cameraInput').click();
+    return;
+  }
+  var video = document.getElementById('camera');
+  var preview = document.getElementById('preview');
+  var placeholder = document.getElementById('placeholder');
+  
+  if (cameraStream) {
+    var canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    imageData = canvas.toDataURL('image/jpeg', 0.85);
+    preview.src = imageData;
+    preview.classList.add('active');
+    video.classList.remove('active');
+    placeholder.style.display = 'none';
+    document.getElementById('previewBox').classList.add('has-image');
+    document.getElementById('identifyBtn').disabled = false;
+    document.getElementById('cameraBtn').querySelector('.lang-en').textContent = 'Camera';
+    document.getElementById('cameraBtn').querySelector('.lang-es').textContent = 'Cámara';
+    cameraStream.getTracks().forEach(function(t) { t.stop(); });
+    cameraStream = null;
+    return;
+  }
+  
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+    .then(function(stream) {
+      cameraStream = stream;
+      video.srcObject = stream;
+      video.classList.add('active');
+      preview.classList.remove('active');
+      placeholder.style.display = 'none';
+      document.getElementById('cameraBtn').querySelector('.lang-en').textContent = 'Snap';
+      document.getElementById('cameraBtn').querySelector('.lang-es').textContent = 'Capturar';
+    })
+    .catch(function(err) {
+      document.getElementById('cameraInput').click();
+    });
+}
+
+function handleFile(event) {
+  var file = event.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    imageData = e.target.result;
+    var preview = document.getElementById('preview');
+    preview.src = imageData;
+    preview.classList.add('active');
+    document.getElementById('camera').classList.remove('active');
+    document.getElementById('placeholder').style.display = 'none';
+    document.getElementById('previewBox').classList.add('has-image');
+    document.getElementById('identifyBtn').disabled = false;
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(function(t) { t.stop(); });
+      cameraStream = null;
+    }
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+}
+
+function identify() {
+  if (!imageData) return;
+  var loading = document.getElementById('loading');
+  var resultCard = document.getElementById('resultCard');
+  var identifyBtn = document.getElementById('identifyBtn');
+  
+  loading.classList.add('active');
+  resultCard.classList.remove('visible');
+  resultCard.innerHTML = '';
+  identifyBtn.disabled = true;
+  
+  fetch('/identify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ image_data: imageData })
+  })
+  .then(function(res) { return res.json(); })
+  .then(function(data) {
+    loading.classList.remove('active');
+    identifyBtn.disabled = false;
+    renderResult(data);
+  })
+  .catch(function(err) {
+    loading.classList.remove('active');
+    identifyBtn.disabled = false;
+    renderResult({ error: err.message, suggestion: 'Check your connection and try again.' });
+  });
+}
+
+function renderResult(data) {
+  var card = document.getElementById('resultCard');
+  
+  if (data.error) {
+    card.innerHTML = '<div class="result-error">' +
+      '<p>' + esc(data.error) + '</p>' +
+      (data.suggestion ? '<p class="suggestion">' + esc(data.suggestion) + '</p>' : '') +
+      '</div>';
+    card.classList.add('visible');
+    return;
+  }
+  
+  var name = currentLang === 'es' ? (data.nombre_comun || data.common_name) : data.common_name;
+  var desc = currentLang === 'es' ? (data.descripcion || data.description) : data.description;
+  var conf = data.confidence || 'medium';
+  var confLabel = currentLang === 'es' 
+    ? {high:'Alta',medium:'Media',low:'Baja'}[conf] || 'Media'
+    : conf.charAt(0).toUpperCase() + conf.slice(1);
+  
+  var jVal = data.found_in_jalisco;
+  var jClass = jVal === true ? 'yes' : jVal === false ? 'no' : 'unknown';
+  var jText = jVal === true ? (currentLang === 'es' ? 'Sí' : 'Yes') 
+            : jVal === false ? 'No' 
+            : (currentLang === 'es' ? 'Desconocido' : 'Unknown');
+  
+  var html = '<div class="result-header">' +
+    '<div class="result-common">' + esc(name) + '</div>' +
+    '<div class="result-scientific">' + esc(data.scientific_name || '') + '</div>' +
+    (data.breed ? '<div class="result-breed">' + esc(data.breed) + '</div>' : '') +
+    '</div><div class="result-body">' +
+    row(currentLang === 'es' ? 'Familia' : 'Family', esc(data.family || '—')) +
+    row(currentLang === 'es' ? 'Confianza' : 'Confidence', '<span class="badge badge-' + conf + '">' + confLabel + '</span>') +
+    row(currentLang === 'es' ? 'Conservación' : 'Conservation', esc(data.conservation_status || '—')) +
+    row(currentLang === 'es' ? 'En Jalisco' : 'In Jalisco', '<span class="badge badge-' + jClass + '">' + jText + '</span>') +
+    '<div class="result-description">' + esc(desc || '') + '</div>' +
+    (data.fun_fact ? '<div class="result-fun-fact"><strong>' + (currentLang === 'es' ? 'Dato curioso ' : 'Fun fact ') + '</strong>' + esc(data.fun_fact) + '</div>' : '') +
+    '</div>';
+  
+  card.innerHTML = html;
+  requestAnimationFrame(function() { card.classList.add('visible'); });
+}
+
+function row(label, value) {
+  return '<div class="result-row"><span class="result-label">' + label + '</span><span class="result-value">' + value + '</span></div>';
+}
+
+function esc(str) {
+  if (!str) return '';
+  var d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+</script>
+</body>
+</html>
