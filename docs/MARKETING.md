@@ -300,6 +300,12 @@ The format itself is the proof of concept. If CushLabs can build this for a cons
 **Live site:** [biojalisco-pitch.vercel.app](https://biojalisco-pitch.vercel.app)
 **Species Identifier:** [biojalisco-pitch.vercel.app/species-id](https://biojalisco-pitch.vercel.app/species-id)
 
+**Direct Presentation Links** (auto-narrated, hands-free):
+- English: [biojalisco-pitch.vercel.app/?mode=prez&lang=en](https://biojalisco-pitch.vercel.app/?mode=prez&lang=en)
+- Spanish: [biojalisco-pitch.vercel.app/?mode=prez&lang=es](https://biojalisco-pitch.vercel.app/?mode=prez&lang=es)
+
+URL parameters: `?mode=prez` auto-launches presentation, `?lang=es|en` sets language. Combinable for one-click outreach links.
+
 **CushLabs AI Services**
 info@cushlabs.ai
 

@@ -52,7 +52,22 @@ All content exists in both languages in the DOM. A `data-lang` attribute on the 
 **Pitch Site:** [biojalisco-pitch.vercel.app](https://biojalisco-pitch.vercel.app)
 **Species Identifier:** [biojalisco-pitch.vercel.app/species-id](https://biojalisco-pitch.vercel.app/species-id)
 
-Try these interactions:
+### Direct Presentation Links
+
+Share these for a hands-free, auto-narrated experience:
+
+- **English:** [biojalisco-pitch.vercel.app/?mode=prez&lang=en](https://biojalisco-pitch.vercel.app/?mode=prez&lang=en)
+- **Spanish:** [biojalisco-pitch.vercel.app/?mode=prez&lang=es](https://biojalisco-pitch.vercel.app/?mode=prez&lang=es)
+
+### URL Parameters
+
+| Parameter | Values | Effect |
+|-----------|--------|--------|
+| `mode` | `prez` | Skips overlay, auto-launches narrated presentation |
+| `lang` | `es`, `en` | Sets language (overrides browser detection) |
+
+### Try These Interactions
+
 - Toggle the **ES/EN** language switch (top right) — all content swaps instantly
 - Click the **audio button** (top left) — procedural forest ambience fades in
 - Scroll slowly through each act — watch the counters animate and elements reveal on scroll

@@ -58,6 +58,16 @@ vercel --prod
 - **Species Identifier**: Camera/upload → GPT-4o vision → structured JSON (confidence %, taxonomy, ecology, geography, conservation, similar species) → tabbed UI with scan history in localStorage
 - **Secret footer link**: Leaf icon (20% opacity, 50% hover) in pitch site footer links to `/species-id`
 
+## URL Parameters
+- `?mode=prez` — Auto-launches presentation mode (skips overlay, starts narration + auto-scroll)
+- `?lang=es` / `?lang=en` — Sets language (overrides browser auto-detection)
+- Combinable: `?mode=prez&lang=es` for a fully automatic Spanish presentation
+
+### Outreach Links
+- English presentation: `https://biojalisco-pitch.vercel.app/?mode=prez&lang=en`
+- Spanish presentation: `https://biojalisco-pitch.vercel.app/?mode=prez&lang=es`
+- Species Identifier: `https://biojalisco-pitch.vercel.app/species-id`
+
 ## Vercel Routing
 - `/` → `index.html` (pitch site)
 - `/species-id` → `species-id/static/index.html` (Species Identifier UI)
