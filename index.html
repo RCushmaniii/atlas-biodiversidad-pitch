@@ -1554,12 +1554,13 @@ body.presentation-active .progress-bar {
   display: none;
 }
 /* Hide scrollbar during presentation mode */
-body.presentation-active,
-body.presentation-active html {
+html.pres-no-scrollbar,
+html.pres-no-scrollbar body {
   scrollbar-width: none;
+  -ms-overflow-style: none;
 }
-body.presentation-active::-webkit-scrollbar,
-html:has(body.presentation-active)::-webkit-scrollbar {
+html.pres-no-scrollbar::-webkit-scrollbar,
+html.pres-no-scrollbar body::-webkit-scrollbar {
   display: none;
 }
 .pres-exit-btn {
@@ -2485,15 +2486,13 @@ function lockScroll() {
   window.addEventListener('wheel', preventScroll, {passive: false});
   window.addEventListener('touchmove', preventScroll, {passive: false});
   window.addEventListener('keydown', preventScrollKeys, {passive: false});
-  document.documentElement.style.overflow = 'hidden';
-  document.body.style.overflow = 'hidden';
+  document.documentElement.classList.add('pres-no-scrollbar');
 }
 function unlockScroll() {
   window.removeEventListener('wheel', preventScroll);
   window.removeEventListener('touchmove', preventScroll);
   window.removeEventListener('keydown', preventScrollKeys);
-  document.documentElement.style.overflow = '';
-  document.body.style.overflow = '';
+  document.documentElement.classList.remove('pres-no-scrollbar');
 }
 
 function startPresentation() {
