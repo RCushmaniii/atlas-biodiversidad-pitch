@@ -1553,7 +1553,15 @@ body.presentation-active .lang-toggle,
 body.presentation-active .progress-bar {
   display: none;
 }
-/* Scroll lock is handled via JS event prevention to allow programmatic scrollIntoView */
+/* Hide scrollbar during presentation mode */
+body.presentation-active,
+body.presentation-active html {
+  scrollbar-width: none;
+}
+body.presentation-active::-webkit-scrollbar,
+html:has(body.presentation-active)::-webkit-scrollbar {
+  display: none;
+}
 .pres-exit-btn {
   display: none;
   position: fixed;
@@ -2477,11 +2485,15 @@ function lockScroll() {
   window.addEventListener('wheel', preventScroll, {passive: false});
   window.addEventListener('touchmove', preventScroll, {passive: false});
   window.addEventListener('keydown', preventScrollKeys, {passive: false});
+  document.documentElement.style.overflow = 'hidden';
+  document.body.style.overflow = 'hidden';
 }
 function unlockScroll() {
   window.removeEventListener('wheel', preventScroll);
   window.removeEventListener('touchmove', preventScroll);
   window.removeEventListener('keydown', preventScrollKeys);
+  document.documentElement.style.overflow = '';
+  document.body.style.overflow = '';
 }
 
 function startPresentation() {
